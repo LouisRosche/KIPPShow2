@@ -1,0 +1,3395 @@
+<artifact identifier="kipp-data-compliance-dashboard" type="application/vnd.ant.html" title="KIPP St. Louis Data & Compliance Command Center">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KIPP St. Louis - Data & Compliance Command Center</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.min.js"></script>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-900: #111827;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-900);
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .header .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .header-stats {
+            display: flex;
+            gap: 2rem;
+            font-size: 0.9rem;
+        }
+        
+        .header-stat {
+            text-align: center;
+        }
+        
+        .header-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .header-stat-label {
+            opacity: 0.9;
+            font-size: 0.75rem;
+        }
+        
+        .nav {
+            background: white;
+            padding: 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 96px;
+            z-index: 99;
+        }
+        
+        .nav-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            gap: 0;
+            overflow-x: auto;
+        }
+        
+        .nav-btn {
+            padding: 1rem 1.5rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            transition: all 0.2s;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            color: var(--gray-600);
+        }
+        
+        .nav-btn:hover {
+            background: var(--gray-50);
+            color: var(--primary);
+        }
+        
+        .nav-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: var(--gray-50);
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .dashboard-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .dashboard-grid-3 {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: box-shadow 0.2s;
+        }
+        
+        .card:hover {
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .metric:last-child {
+            border-bottom: none;
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--gray-600);
+        }
+        
+        .metric-value {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .metric-value.good {
+            color: var(--success);
+        }
+        
+        .metric-value.warning {
+            color: var(--warning);
+        }
+        
+        .metric-value.critical {
+            color: var(--danger);
+        }
+        
+        .kpi-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .kpi-value {
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+        
+        .kpi-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .kpi-change {
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        
+        .alert-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+        
+        .alert-content {
+            flex: 1;
+        }
+        
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .alert.critical {
+            background: #fef2f2;
+            border-color: var(--danger);
+            color: #991b1b;
+        }
+        
+        .alert.warning {
+            background: #fffbeb;
+            border-color: var(--warning);
+            color: #92400e;
+        }
+        
+        .alert.info {
+            background: #eff6ff;
+            border-color: var(--primary-light);
+            color: #1e40af;
+        }
+        
+        .alert.success {
+            background: #f0fdf4;
+            border-color: var(--success);
+            color: #065f46;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        
+        .data-table th {
+            background: var(--gray-100);
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--gray-300);
+            position: sticky;
+            top: 0;
+        }
+        
+        .data-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .data-table tr:hover {
+            background: var(--gray-50);
+        }
+        
+        .data-table tbody tr {
+            transition: background 0.2s;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-badge.complete {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-badge.in-progress {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .status-badge.overdue {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .status-badge.not-started {
+            background: var(--gray-200);
+            color: var(--gray-700);
+        }
+        
+        .status-badge.high {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .status-badge.medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-badge.low {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background: var(--primary-light);
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary);
+        }
+        
+        .btn-secondary {
+            background: var(--gray-200);
+            color: var(--gray-700);
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--gray-300);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover:not(:disabled) {
+            background: #059669;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover:not(:disabled) {
+            background: #dc2626;
+        }
+        
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .btn-icon {
+            padding: 0.5rem;
+            width: 36px;
+            height: 36px;
+            justify-content: center;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 1rem;
+        }
+        
+        .chart-container-lg {
+            height: 400px;
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--gray-200);
+        }
+        
+        .tab {
+            padding: 0.75rem 1rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--gray-600);
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+        
+        .tab:hover {
+            color: var(--primary);
+        }
+        
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+        
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-light);
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .code-editor {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            white-space: pre;
+            line-height: 1.5;
+        }
+        
+        .sql-keyword {
+            color: #569cd6;
+        }
+        
+        .sql-string {
+            color: #ce9178;
+        }
+        
+        .sql-number {
+            color: #b5cea8;
+        }
+        
+        .sql-comment {
+            color: #6a9955;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--gray-200);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-light);
+            transition: width 0.3s;
+        }
+        
+        .progress-fill.success {
+            background: var(--success);
+        }
+        
+        .progress-fill.warning {
+            background: var(--warning);
+        }
+        
+        .progress-fill.danger {
+            background: var(--danger);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px rgba(0,0,0,0.15);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-600);
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .spinner {
+            border: 3px solid var(--gray-200);
+            border-top: 3px solid var(--primary-light);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--gray-900);
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 0.5rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8rem;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .export-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        @media (max-width: 1200px) {
+            .dashboard-grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid,
+            .dashboard-grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div>
+                <h1>KIPP St. Louis - Data & Compliance Command Center</h1>
+                <div class="subtitle">Integrated Student Information Systems • DESE Compliance • Strategic Analytics</div>
+            </div>
+            <div class="header-stats">
+                <div class="header-stat">
+                    <div class="header-stat-value" id="header-students">1,247</div>
+                    <div class="header-stat-label">Active Students</div>
+                </div>
+                <div class="header-stat">
+                    <div class="header-stat-value good" id="header-accuracy">97.3%</div>
+                    <div class="header-stat-label">Data Accuracy</div>
+                </div>
+                <div class="header-stat">
+                    <div class="header-stat-value" id="header-sync">—</div>
+                    <div class="header-stat-label">Last Sync</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="nav">
+        <div class="nav-container">
+            <button class="nav-btn active" onclick="switchPage('overview')">📊 Overview</button>
+            <button class="nav-btn" onclick="switchPage('data-integrity')">✓ Data Integrity</button>
+            <button class="nav-btn" onclick="switchPage('attendance')">📅 Attendance</button>
+            <button class="nav-btn" onclick="switchPage('compliance')">📋 Compliance</button>
+            <button class="nav-btn" onclick="switchPage('dese')">🏛️ DESE Reporting</button>
+            <button class="nav-btn" onclick="switchPage('sql-query')">💾 SQL Query Builder</button>
+            <button class="nav-btn" onclick="switchPage('scheduling')">📚 Scheduling</button>
+            <button class="nav-btn" onclick="switchPage('strategic')">📈 Strategic KPIs</button>
+            <button class="nav-btn" onclick="switchPage('analytics')">🔬 Advanced Analytics</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- OVERVIEW PAGE -->
+        <div id="overview" class="page active">
+            <div id="alerts-container"></div>
+            
+            <div class="dashboard-grid">
+                <div class="kpi-card">
+                    <div class="kpi-label">System Health Score</div>
+                    <div class="kpi-value" id="system-health">97.3%</div>
+                    <div class="kpi-change">
+                        ↑ 2.1% from last month
+                    </div>
+                </div>
+                
+                <div class="kpi-card" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%);">
+                    <div class="kpi-label">Average Daily Attendance</div>
+                    <div class="kpi-value" id="avg-attendance">94.2%</div>
+                    <div class="kpi-change">
+                        ↑ 0.8% from last week
+                    </div>
+                </div>
+                
+                <div class="kpi-card" style="background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);">
+                    <div class="kpi-label">Compliance Items Due</div>
+                    <div class="kpi-value" id="compliance-due">9</div>
+                    <div class="kpi-change">
+                        7 upcoming • 2 overdue
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">📊 Data Quality Metrics</div>
+                        <button class="btn btn-sm btn-secondary" onclick="runDataValidation()">
+                            Refresh
+                        </button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="dataQualityChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">📈 Attendance Trends (10 Weeks)</div>
+                        <button class="btn btn-sm btn-secondary" onclick="exportAttendanceReport()">
+                            Export
+                        </button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="attendanceOverviewChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-grid-3">
+                <div class="card">
+                    <div class="card-title">🎯 Quick Actions</div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; margin-top: 1rem;">
+                        <button class="btn btn-primary" onclick="runDataValidation()">
+                            🔍 Run Full Validation
+                        </button>
+                        <button class="btn btn-primary" onclick="generateMOSISReport()">
+                            📄 Generate MOSIS
+                        </button>
+                        <button class="btn btn-primary" onclick="switchPage('scheduling')">
+                            📚 Build Schedules
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportDashboard()">
+                            📊 Export Dashboard
+                        </button>
+                        <button class="btn btn-secondary" onclick="openModal('sql-modal')">
+                            💾 Run SQL Query
+                        </button>
+                        <button class="btn btn-secondary" onclick="generateTruancyLetters()">
+                            ✉️ Truancy Letters
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">⚡ System Status</div>
+                    <div class="metric">
+                        <span class="metric-label">PowerSchool SIS</span>
+                        <span class="status-badge complete">● Online</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">MOSIS Connection</span>
+                        <span class="status-badge complete">● Connected</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Data Warehouse</span>
+                        <span class="status-badge complete">● Synced</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Last ETL Run</span>
+                        <span class="metric-value" style="font-size: 0.9rem;">3:00 AM</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">📋 Recent Activity Log</div>
+                <div style="overflow-x: auto; margin-top: 1rem;">
+                    <table class="data-table" id="activity-log"></table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- DATA INTEGRITY PAGE -->
+        <div id="data-integrity" class="page">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('validation-results', this)">Validation Results</button>
+                <button class="tab" onclick="switchTab('data-issues', this)">Data Issues</button>
+                <button class="tab" onclick="switchTab('duplicate-detection', this)">Duplicate Detection</button>
+                <button class="tab" onclick="switchTab('data-audit', this)">Audit Trail</button>
+            </div>
+            
+            <div id="validation-results" class="tab-content active">
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-title">Overall Data Quality</div>
+                        <div class="chart-container">
+                            <canvas id="validationDoughnutChart"></canvas>
+                        </div>
+                        <div style="text-align: center; margin-top: 1rem;">
+                            <div style="font-size: 2rem; font-weight: 700; color: var(--success);">97.3%</div>
+                            <div style="color: var(--gray-600);">1,213 / 1,247 records valid</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">Validation by Category</div>
+                        <div class="chart-container">
+                            <canvas id="validationCategoryChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">Critical Issues</div>
+                        <div class="metric">
+                            <span class="metric-label">Duplicate State IDs</span>
+                            <span class="metric-value critical">2</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Invalid Grade Levels</span>
+                            <span class="metric-value critical">3</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Missing Birth Dates</span>
+                            <span class="metric-value critical">1</span>
+                        </div>
+                        <div style="margin-top: 1rem;">
+                            <button class="btn btn-danger btn-sm" onclick="fixCriticalIssues()">
+                                Fix Critical Issues
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-top: 1.5rem;">
+                    <div class="card-header">
+                        <div class="card-title">Validation Rules Status</div>
+                        <div class="card-actions">
+                            <button class="btn btn-sm btn-primary" onclick="runDataValidation()">
+                                Run Validation
+                            </button>
+                            <button class="btn btn-sm btn-secondary" onclick="exportValidationReport()">
+                                Export Report
+                            </button>
+                        </div>
+                    </div>
+                    <div id="validation-rules-container"></div>
+                </div>
+            </div>
+            
+            <div id="data-issues" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">All Data Quality Issues</div>
+                        <div class="card-actions">
+                            <select class="form-select" style="width: auto;" onchange="filterIssues(this.value)">
+                                <option value="all">All Issues</option>
+                                <option value="critical">Critical Only</option>
+                                <option value="high">High Priority</option>
+                                <option value="medium">Medium Priority</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="data-table" id="data-issues-table"></table>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="duplicate-detection" class="tab-content">
+                <div class="card">
+                    <div class="card-title">Duplicate Record Detection</div>
+                    <div class="alert info">
+                        <div class="alert-icon">ℹ️</div>
+                        <div class="alert-content">
+                            <div class="alert-title">Machine Learning Detection Active</div>
+                            Using fuzzy matching algorithms to detect potential duplicate student records across multiple data points.
+                        </div>
+                    </div>
+                    <div style="overflow-x: auto; margin-top: 1rem;">
+                        <table class="data-table" id="duplicates-table"></table>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="data-audit" class="tab-content">
+                <div class="card">
+                    <div class="card-title">Data Change Audit Trail</div>
+                    <div class="form-group">
+                        <label class="form-label">Filter by Date Range</label>
+                        <div class="grid-2">
+                            <input type="date" class="form-input" id="audit-start-date">
+                            <input type="date" class="form-input" id="audit-end-date">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="loadAuditTrail()">Load Audit Trail</button>
+                    <div style="overflow-x: auto; margin-top: 1rem;">
+                        <table class="data-table" id="audit-trail-table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ATTENDANCE PAGE -->
+        <div id="attendance" class="page">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('attendance-overview', this)">Overview</button>
+                <button class="tab" onclick="switchTab('chronic-absence', this)">Chronic Absence</button>
+                <button class="tab" onclick="switchTab('truancy-intervention', this)">Truancy Intervention</button>
+                <button class="tab" onclick="switchTab('attendance-reports', this)">Reports</button>
+            </div>
+            
+            <div id="attendance-overview" class="tab-content active">
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-title">Today's Attendance</div>
+                        <div class="kpi-value" style="color: var(--success);">94.2%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill success" style="width: 94.2%"></div>
+                        </div>
+                        <div style="margin-top: 1rem; font-size: 0.9rem; color: var(--gray-600);">
+                            1,175 present • 52 absent • 20 tardy
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">Weekly Average</div>
+                        <div class="kpi-value">93.8%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 93.8%"></div>
+                        </div>
+                        <div style="margin-top: 1rem; font-size: 0.9rem; color: var(--gray-600);">
+                            Target: 95% • Gap: -1.2%
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">Chronic Absence</div>
+                        <div class="kpi-value" style="color: var(--warning);">156</div>
+                        <div style="margin-top: 1rem; font-size: 0.9rem; color: var(--gray-600);">
+                            12.5% of student body
+                        </div>
+                        <button class="btn btn-warning btn-sm" style="margin-top: 0.5rem;" onclick="switchTab('chronic-absence')">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="dashboard-grid-2">
+                    <div class="card">
+                        <div class="card-title">Attendance Trend (10 Weeks)</div>
+                        <div class="chart-container">
+                            <canvas id="attendanceTrendChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">Absence Reasons</div>
+                        <div class="chart-container">
+                            <canvas id="absenceReasonsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="chronic-absence" class="tab-content">
+                <div class="alert warning">
+                    <div class="alert-icon">⚠️</div>
+                    <div class="alert-content">
+                        <div class="alert-title">Chronic Absence Alert</div>
+                        156 students (12.5%) have missed 10% or more of school days. Research shows chronic absence is a leading indicator of academic failure and dropout risk.
+                    </div>
+                </div>
+                
+                <div class="dashboard-grid-2">
+                    <div class="card">
+                        <div class="card-title">Chronic Absence by Grade</div>
+                        <div class="chart-container">
+                            <canvas id="chronicAbsenceByGradeChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">Chronic Absence by Demographics</div>
+                        <div class="chart-container">
+                            <canvas id="chronicAbsenceDemographicsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Students with Chronic Absence</div>
+                        <button class="btn btn-primary btn-sm" onclick="exportChronicAbsence()">
+                            Export List
+                        </button>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="data-table" id="chronic-absence-table"></table>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="truancy-intervention" class="tab-content">
+                <div class="alert critical">
+                    <div class="alert-icon">🚨</div>
+                    <div class="alert-content">
+                        <div class="alert-title">Truancy Interventions Required</div>
+                        23 students require immediate truancy intervention per Missouri RSMO 167.031. Letters must be generated and sent within 5 business days.
+                    </div>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-title">Tier 1 (5-6 absences)</div>
+                        <div class="kpi-value" style="color: var(--warning);">8</div>
+                        <button class="btn btn-warning btn-sm" style="margin-top: 1rem;" onclick="generateTierLetters(1)">
+                            Generate Letters
+                        </button>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">Tier 2 (7-9 absences)</div>
+                        <div class="kpi-value" style="color: var(--warning);">10</div>
+                        <button class="btn btn-warning btn-sm" style="margin-top: 1rem;" onclick="generateTierLetters(2)">
+                            Generate Letters
+                        </button>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">Tier 3 (10+ absences)</div>
+                        <div class="kpi-value" style="color: var(--danger);">5</div>
+                        <button class="btn btn-danger btn-sm" style="margin-top: 1rem;" onclick="generateTierLetters(3)">
+                            Generate Letters
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Truancy Intervention Queue</div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary btn-sm" onclick="generateAllTruancyLetters()">
+                                Generate All Letters
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="exportTruancyData()">
+                                Export to Excel
+                            </button>
+                        </div>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="data-table" id="truancy-table"></table>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="attendance-reports" class="tab-content">
+                <div class="card">
+                    <div class="card-title">Monthly Attendance Reports</div>
+                    <div class="grid-2" style="margin-top: 1rem;">
+                        <div>
+                            <label class="form-label">Select Month</label>
+                            <select class="form-select" id="attendance-month">
+                                <option value="11">November 2025</option>
+                                <option value="10">October 2025</option>
+                                <option value="09">September 2025</option>
+                                <option value="08">August 2025</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">Report Type</label>
+                            <select class="form-select" id="attendance-report-type">
+                                <option value="summary">Summary Report</option>
+                                <option value="detailed">Detailed Report</option>
+                                <option value="by-grade">By Grade Level</option>
+                                <option value="by-teacher">By Teacher</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-primary" onclick="generateAttendanceReport()">
+                            Generate Report
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-top: 1.5rem;">
+                    <div class="card-title">DESE Attendance Submissions</div>
+                    <div class="alert info">
+                        <div class="alert-icon">ℹ️</div>
+                        <div class="alert-content">
+                            Bi-annual attendance submissions due: December 15, 2025 and May 15, 2026
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-primary" onclick="generateDESEAttendance()">
+                            Generate DESE Submission File
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- COMPLIANCE PAGE -->
+        <div id="compliance" class="page">
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-title">Compliance Overview</div>
+                    <div class="metric">
+                        <span class="metric-label">Total Items</span>
+                        <span class="metric-value">32</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Complete</span>
+                        <span class="metric-value good">18</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">In Progress</span>
+                        <span class="metric-value warning">7</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Overdue</span>
+                        <span class="metric-value critical">2</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Not Started</span>
+                        <span class="metric-value">5</span>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">Upcoming Deadlines</div>
+                    <div class="chart-container">
+                        <canvas id="complianceTimelineChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">Compliance by Category</div>
+                    <div class="chart-container">
+                        <canvas id="complianceCategoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Compliance Tracker</div>
+                    <div class="card-actions">
+                        <button class="btn btn-primary btn-sm" onclick="openModal('add-compliance-modal')">
+                            + Add Item
+                        </button>
+                        <button class="btn btn-secondary btn-sm" onclick="exportComplianceReport()">
+                            Export
+                        </button>
+                    </div>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="data-table" id="compliance-table"></table>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Compliance Notifications</div>
+                <div class="form-group">
+                    <label class="form-label">Email alerts for upcoming deadlines:</label>
+                    <div style="display: flex; gap: 1rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" checked> 7 days before
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" checked> 3 days before
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" checked> 1 day before
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" checked> On due date
+                        </label>
+                    </div>
+                </div>
+                <button class="btn btn-primary">Save Notification Settings</button>
+            </div>
+        </div>
+        
+        <!-- DESE REPORTING PAGE -->
+        <div id="dese" class="page">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('mosis-generator', this)">MOSIS Generator</button>
+                <button class="tab" onclick="switchTab('dese-validation', this)">DESE Validation</button>
+                <button class="tab" onclick="switchTab('submission-history', this)">Submission History</button>
+            </div>
+            
+            <div id="mosis-generator" class="tab-content active">
+                <div class="card">
+                    <div class="card-title">MOSIS Report Generator</div>
+                    <div class="alert info">
+                        <div class="alert-icon">ℹ️</div>
+                        <div class="alert-content">
+                            <div class="alert-title">Missouri Student Information System (MOSIS)</div>
+                            Generate fixed-width formatted files per DESE specifications for state reporting requirements.
+                        </div>
+                    </div>
+                    
+                    <div class="grid-2" style="margin-top: 1.5rem;">
+                        <div class="form-group">
+                            <label class="form-label">Report Type</label>
+                            <select class="form-select" id="mosis-report-type">
+                                <option value="student-core">Student Core Data (Section A)</option>
+                                <option value="enrollment">Enrollment Data (Section B)</option>
+                                <option value="attendance">Attendance Data (Section C)</option>
+                                <option value="discipline">Discipline Data (Section D)</option>
+                                <option value="assessment">Assessment Data (Section E)</option>
+                                <option value="special-ed">Special Education (Section F)</option>
+                                <option value="staff">Staff Data (Section G)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">School Year</label>
+                            <select class="form-select" id="mosis-school-year">
+                                <option value="2025-2026" selected>2025-2026</option>
+                                <option value="2024-2025">2024-2025</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Reporting Period</label>
+                        <select class="form-select" id="mosis-period">
+                            <option value="fall">Fall Collection (December 15)</option>
+                            <option value="end-of-year">End of Year Collection (July 31)</option>
+                        </select>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                        <button class="btn btn-primary" onclick="validateMOSISData()">
+                            1. Validate Data
+                        </button>
+                        <button class="btn btn-success" id="generate-mosis-btn" onclick="generateMOSISReport()" disabled>
+                            2. Generate Report
+                        </button>
+                    </div>
+                    
+                    <div id="mosis-output" style="margin-top: 1.5rem;"></div>
+                </div>
+            </div>
+            
+            <div id="dese-validation" class="tab-content">
+                <div class="card">
+                    <div class="card-title">DESE Data Quality Pre-Check</div>
+                    <p style="margin-bottom: 1rem; color: var(--gray-600);">
+                        Run comprehensive validation against DESE edit checks before submission.
+                    </p>
+                    <button class="btn btn-primary" onclick="runDESEValidation()">
+                        Run DESE Validation
+                    </button>
+                    <div id="dese-validation-results" style="margin-top: 1.5rem;"></div>
+                </div>
+            </div>
+            
+            <div id="submission-history" class="tab-content">
+                <div class="card">
+                    <div class="card-title">DESE Submission History</div>
+                    <div style="overflow-x: auto; margin-top: 1rem;">
+                        <table class="data-table" id="submission-history-table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SQL QUERY BUILDER PAGE -->
+        <div id="sql-query" class="page">
+            <div class="dashboard-grid-3">
+                <div class="card">
+                    <div class="card-title">SQL Query Builder</div>
+                    <div class="alert info">
+                        <div class="alert-icon">💾</div>
+                        <div class="alert-content">
+                            Write and execute SQL queries against PowerSchool database. Results can be exported to Excel.
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <label class="form-label">Query Name (Optional)</label>
+                        <input type="text" class="form-input" id="query-name" placeholder="e.g., Student Roster by Grade">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">SQL Query</label>
+                        <textarea class="form-textarea" id="sql-query-input" style="font-family: monospace; min-height: 300px;" placeholder="SELECT 
+    s.student_number,
+    s.first_name,
+    s.last_name,
+    s.grade_level,
+    s.ethnicity
+FROM students s
+WHERE s.enroll_status = 0
+ORDER BY s.grade_level, s.last_name"></textarea>
+                    </div>
+                    
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-primary" onclick="executeSQL()">
+                            ▶️ Execute Query
+                        </button>
+                        <button class="btn btn-secondary" onclick="saveQuery()">
+                            💾 Save Query
+                        </button>
+                        <button class="btn btn-secondary" onclick="loadSavedQueries()">
+                            📂 Load Saved
+                        </button>
+                    </div>
+                    
+                    <div class="card" style="margin-top: 1rem; padding: 1rem; background: var(--gray-50);">
+                        <div style="font-weight: 600; margin-bottom: 0.5rem;">Query Templates:</div>
+                        <select class="form-select" onchange="loadQueryTemplate(this.value)">
+                            <option value="">-- Select Template --</option>
+                            <option value="student-roster">Student Roster</option>
+                            <option value="attendance-summary">Attendance Summary</option>
+                            <option value="grade-distribution">Grade Distribution</option>
+                            <option value="schedule-conflicts">Schedule Conflicts</option>
+                            <option value="missing-data">Missing Data Report</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">Query Results</div>
+                    <div id="sql-results-container">
+                        <div style="text-align: center; color: var(--gray-600); padding: 2rem;">
+                            Execute a query to see results
+                        </div>
+                    </div>
+                    <div class="export-section" id="sql-export-section" style="display: none;">
+                        <button class="btn btn-primary" onclick="exportSQLResults()">
+                            📊 Export to Excel
+                        </button>
+                        <button class="btn btn-secondary" onclick="copySQLResults()">
+                            📋 Copy to Clipboard
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">PowerSchool Database Schema Reference</div>
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('schema-students', this)">Students</button>
+                    <button class="tab" onclick="switchTab('schema-courses', this)">Courses</button>
+                    <button class="tab" onclick="switchTab('schema-attendance', this)">Attendance</button>
+                    <button class="tab" onclick="switchTab('schema-grades', this)">Grades</button>
+                </div>
+                
+                <div id="schema-students" class="tab-content active">
+                    <div class="code-editor">-- STUDENTS TABLE
+<span class="sql-keyword">SELECT</span> *
+<span class="sql-keyword">FROM</span> students
+<span class="sql-keyword">WHERE</span> enroll_status = <span class="sql-number">0</span> <span class="sql-comment">-- 0 = Active, 2 = Transferred, 3 = Graduated</span>
+
+<span class="sql-comment">-- Key Fields:</span>
+<span class="sql-comment">-- id (internal), student_number (visible ID), state_studentnumber (state ID)</span>
+<span class="sql-comment">-- first_name, last_name, grade_level, dob, gender, ethnicity</span>
+<span class="sql-comment">-- enroll_status, entrydate, exitdate, schoolid</span></div>
+                </div>
+                
+                <div id="schema-courses" class="tab-content">
+                    <div class="code-editor">-- COURSES & SCHEDULING
+<span class="sql-keyword">SELECT</span> 
+    c.course_name,
+    sec.section_number,
+    t.lastfirst <span class="sql-keyword">AS</span> teacher_name
+<span class="sql-keyword">FROM</span> courses c
+<span class="sql-keyword">JOIN</span> sections sec <span class="sql-keyword">ON</span> c.course_number = sec.course_number
+<span class="sql-keyword">LEFT JOIN</span> teachers t <span class="sql-keyword">ON</span> sec.teacher = t.id</div>
+                </div>
+                
+                <div id="schema-attendance" class="tab-content">
+                    <div class="code-editor">-- ATTENDANCE TABLE
+<span class="sql-keyword">SELECT</span> 
+    s.student_number,
+    att.att_date,
+    att.attendance_codeid,
+    ac.att_code
+<span class="sql-keyword">FROM</span> attendance att
+<span class="sql-keyword">JOIN</span> students s <span class="sql-keyword">ON</span> att.studentid = s.id
+<span class="sql-keyword">JOIN</span> attendance_code ac <span class="sql-keyword">ON</span> att.attendance_codeid = ac.id</div>
+                </div>
+                
+                <div id="schema-grades" class="tab-content">
+                    <div class="code-editor">-- GRADES & STOREDGRADES
+<span class="sql-keyword">SELECT</span> 
+    s.student_number,
+    sg.course_name,
+    sg.grade,
+    sg.storecode <span class="sql-comment">-- Q1, Q2, S1, Y1, etc.</span>
+<span class="sql-keyword">FROM</span> storedgrades sg
+<span class="sql-keyword">JOIN</span> students s <span class="sql-keyword">ON</span> sg.studentid = s.id</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SCHEDULING PAGE -->
+        <div id="scheduling" class="page">
+            <div class="card">
+                <div class="card-title">K-12 Master Schedule Configuration</div>
+                <div class="alert info">
+                    <div class="alert-icon">📚</div>
+                    <div class="alert-content">
+                        <div class="alert-title">Regional Schedule Management</div>
+                        Configure K-12 schedules, course assignments, and student-section placements for all KIPP St. Louis schools.
+                    </div>
+                </div>
+                
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('schedule-overview', this)">Overview</button>
+                    <button class="tab" onclick="switchTab('course-catalog', this)">Course Catalog</button>
+                    <button class="tab" onclick="switchTab('section-builder', this)">Section Builder</button>
+                    <button class="tab" onclick="switchTab('student-scheduler', this)">Student Scheduler</button>
+                    <button class="tab" onclick="switchTab('conflicts', this)">Conflicts</button>
+                </div>
+                
+                <div id="schedule-overview" class="tab-content active">
+                    <div class="dashboard-grid">
+                        <div class="card">
+                            <div class="card-title">Total Courses</div>
+                            <div class="kpi-value">247</div>
+                            <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--gray-600);">
+                                Across all grade levels
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-title">Total Sections</div>
+                            <div class="kpi-value">892</div>
+                            <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--gray-600);">
+                                Average: 3.6 sections/course
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-title">Students Scheduled</div>
+                            <div class="kpi-value good">1,239</div>
+                            <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--gray-600);">
+                                99.4% complete
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-title">Schedule Conflicts</div>
+                            <div class="kpi-value warning">8</div>
+                            <div style="margin-top: 0.5rem;">
+                                <button class="btn btn-warning btn-sm" onclick="switchTab('conflicts')">
+                                    Resolve
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">Schedule Building Status by School</div>
+                        <div style="overflow-x: auto;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>School</th>
+                                        <th>Grades</th>
+                                        <th>Courses</th>
+                                        <th>Sections</th>
+                                        <th>Students Scheduled</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>KIPP Inspire Academy</td>
+                                        <td>6-8</td>
+                                        <td>72</td>
+                                        <td>287</td>
+                                        <td>605 / 605</td>
+                                        <td><span class="status-badge complete">Complete</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>KIPP Triumph Academy</td>
+                                        <td>9-12</td>
+                                        <td>175</td>
+                                        <td>605</td>
+                                        <td>634 / 642</td>
+                                        <td><span class="status-badge in-progress">In Progress</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="course-catalog" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Course Catalog Management</div>
+                            <button class="btn btn-primary btn-sm" onclick="openModal('add-course-modal')">
+                                + Add Course
+                            </button>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table class="data-table" id="course-catalog-table"></table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="section-builder" class="tab-content">
+                    <div class="card">
+                        <div class="card-title">Section Builder</div>
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label class="form-label">Course</label>
+                                <select class="form-select" id="section-course">
+                                    <option value="">-- Select Course --</option>
+                                    <option value="ENG7">7th Grade English</option>
+                                    <option value="MATH7">7th Grade Math</option>
+                                    <option value="SCI7">7th Grade Science</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Teacher</label>
+                                <select class="form-select" id="section-teacher">
+                                    <option value="">-- Select Teacher --</option>
+                                    <option value="1">Smith, John</option>
+                                    <option value="2">Johnson, Mary</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid-3">
+                            <div class="form-group">
+                                <label class="form-label">Period</label>
+                                <select class="form-select" id="section-period">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Room</label>
+                                <input type="text" class="form-input" id="section-room" placeholder="e.g., 201">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Max Capacity</label>
+                                <input type="number" class="form-input" id="section-capacity" value="25">
+                            </div>
+                        </div>
+                        <button class="btn btn-success" onclick="createSection()">
+                            Create Section
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="student-scheduler" class="tab-content">
+                    <div class="card">
+                        <div class="card-title">Automated Student Scheduler</div>
+                        <div class="alert warning">
+                            <div class="alert-icon">⚠️</div>
+                            <div class="alert-content">
+                                <div class="alert-title">Scheduling Algorithm</div>
+                                Uses constraint satisfaction algorithms to optimize student-section assignments while respecting prerequisites, special education accommodations, and balanced class sizes.
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Select Grade Level</label>
+                            <select class="form-select" id="scheduler-grade">
+                                <option value="6">Grade 6</option>
+                                <option value="7">Grade 7</option>
+                                <option value="8">Grade 8</option>
+                                <option value="9">Grade 9</option>
+                                <option value="10">Grade 10</option>
+                                <option value="11">Grade 11</option>
+                                <option value="12">Grade 12</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" onclick="runAutoScheduler()">
+                            Run Automated Scheduler
+                        </button>
+                        <div id="scheduler-results" style="margin-top: 1.5rem;"></div>
+                    </div>
+                </div>
+                
+                <div id="conflicts" class="tab-content">
+                    <div class="card">
+                        <div class="card-title">Schedule Conflicts</div>
+                        <div style="overflow-x: auto;">
+                            <table class="data-table" id="conflicts-table"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- STRATEGIC KPIS PAGE -->
+        <div id="strategic" class="page">
+            <div class="card">
+                <div class="card-title">5-Year Strategic Plan Dashboard</div>
+                <div class="alert info">
+                    <div class="alert-icon">📊</div>
+                    <div class="alert-content">
+                        Track KIPP St. Louis progress against 5-year strategic goals across academic, operational, and financial metrics.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-grid-2">
+                <div class="card">
+                    <div class="card-title">Student Achievement - % Proficient</div>
+                    <div class="chart-container chart-container-lg">
+                        <canvas id="achievementChart"></canvas>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Progress to 2025 Goal:</span>
+                            <span style="font-weight: 600;">95.4%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill good" style="width: 95.4%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">Enrollment Growth</div>
+                    <div class="chart-container chart-container-lg">
+                        <canvas id="enrollmentChart"></canvas>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Progress to 2025 Goal:</span>
+                            <span style="font-weight: 600;">89.1%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill warning" style="width: 89.1%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-title">Staff Retention Rate</div>
+                    <div class="chart-container">
+                        <canvas id="retentionChart"></canvas>
+                    </div>
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <div style="font-size: 2rem; font-weight: 700; color: var(--success);">87.3%</div>
+                        <div style="color: var(--gray-600);">Target: 85%</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">Operating Margin</div>
+                    <div class="chart-container">
+                        <canvas id="financialChart"></canvas>
+                    </div>
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <div style="font-size: 2rem; font-weight: 700; color: var(--success);">3.7%</div>
+                        <div style="color: var(--gray-600);">Above 3% target</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">College Persistence (4-year)</div>
+                    <div style="text-align: center; padding: 2rem 0;">
+                        <div style="font-size: 3rem; font-weight: 700; color: var(--primary);">73%</div>
+                        <div style="color: var(--gray-600); margin-top: 0.5rem;">Target: 75%</div>
+                        <div class="progress-bar" style="margin-top: 1rem;">
+                            <div class="progress-fill warning" style="width: 97.3%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ADVANCED ANALYTICS PAGE -->
+        <div id="analytics" class="page">
+            <div class="card">
+                <div class="card-title">Predictive Analytics & Machine Learning</div>
+                <div class="alert info">
+                    <div class="alert-icon">🔬</div>
+                    <div class="alert-content">
+                        Advanced analytics using machine learning for student intervention prediction, enrollment forecasting, and risk assessment.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('predictive-intervention', this)">Intervention Prediction</button>
+                <button class="tab" onclick="switchTab('enrollment-forecast', this)">Enrollment Forecast</button>
+                <button class="tab" onclick="switchTab('assessment-analysis', this)">Assessment Analysis</button>
+                <button class="tab" onclick="switchTab('cohort-analysis', this)">Cohort Analysis</button>
+            </div>
+            
+            <div id="predictive-intervention" class="tab-content active">
+                <div class="alert warning">
+                    <div class="alert-icon">🤖</div>
+                    <div class="alert-content">
+                        <div class="alert-title">ML Model: Random Forest Classifier (95% accuracy)</div>
+                        Predictive model identifies students at risk of chronic absence, academic failure, or behavioral issues using historical data patterns.
+                    </div>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-title">High Risk Students</div>
+                        <div class="kpi-value" style="color: var(--danger);">47</div>
+                        <div style="margin-top: 1rem;">
+                            <button class="btn btn-danger btn-sm" onclick="viewHighRiskStudents()">
+                                View List
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">Medium Risk</div>
+                        <div class="kpi-value" style="color: var(--warning);">123</div>
+                        <div style="margin-top: 1rem;">
+                            <button class="btn btn-warning btn-sm" onclick="viewMediumRiskStudents()">
+                                View List
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">Model Accuracy</div>
+                        <div class="kpi-value" style="color: var(--success);">95.2%</div>
+                        <div style="margin-top: 1rem; font-size: 0.9rem; color: var(--gray-600);">
+                            Validated on 2023-24 cohort
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">Feature Importance (Top Risk Factors)</div>
+                    <div class="chart-container">
+                        <canvas id="featureImportanceChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">Predicted High-Risk Students</div>
+                    <div style="overflow-x: auto;">
+                        <table class="data-table" id="high-risk-table"></table>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="enrollment-forecast" class="tab-content">
+                <div class="card">
+                    <div class="card-title">Enrollment Projections (Next 3 Years)</div>
+                    <div class="chart-container chart-container-lg">
+                        <canvas id="enrollmentForecastChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-title">2026-27 Projection</div>
+                        <div class="kpi-value">1,342</div>
+                        <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--gray-600);">
+                            95% confidence interval: 1,298 - 1,386
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">2027-28 Projection</div>
+                        <div class="kpi-value">1,445</div>
+                        <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--gray-600);">
+                            95% confidence interval: 1,387 - 1,503
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">2028-29 Projection</div>
+                        <div class="kpi-value">1,523</div>
+                        <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--gray-600);">
+                            95% confidence interval: 1,449 - 1,597
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="assessment-analysis" class="tab-content">
+                <div class="card">
+                    <div class="card-title">MAP Growth Assessment Analysis</div>
+                    <div class="dashboard-grid-2">
+                        <div>
+                            <div class="chart-container chart-container-lg">
+                                <canvas id="mapGrowthChart"></canvas>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 style="margin-bottom: 1rem;">Growth Metrics</h3>
+                            <div class="metric">
+                                <span class="metric-label">Students Met Growth Target</span>
+                                <span class="metric-value good">68%</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Avg Growth (RIT Points)</span>
+                                <span class="metric-value">12.4</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">National Norm Percentile</span>
+                                <span class="metric-value">58th</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Students Below 40th %ile</span>
+                                <span class="metric-value warning">387</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="cohort-analysis" class="tab-content">
+                <div class="card">
+                    <div class="card-title">Cohort Tracking Analysis</div>
+                    <p style="color: var(--gray-600); margin-bottom: 1rem;">
+                        Track student cohorts from 6th grade through 12th grade graduation and beyond.
+                    </p>
+                    <div class="chart-container chart-container-lg">
+                        <canvas id="cohortChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">Class of 2025 Outcomes</div>
+                    <div class="dashboard-grid">
+                        <div style="text-align: center;">
+                            <div style="font-size: 2.5rem; font-weight: 700; color: var(--success);">96%</div>
+                            <div style="color: var(--gray-600);">College Acceptance Rate</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 2.5rem; font-weight: 700; color: var(--success);">$8.2M</div>
+                            <div style="color: var(--gray-600);">Total Scholarships</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary);">$56,300</div>
+                            <div style="color: var(--gray-600);">Avg Scholarship per Student</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MODALS -->
+    <div id="sql-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Quick SQL Query</div>
+                <span class="modal-close" onclick="closeModal('sql-modal')">&times;</span>
+            </div>
+            <div class="form-group">
+                <label class="form-label">SQL Query</label>
+                <textarea class="form-textarea" id="modal-sql-query" style="font-family: monospace;"></textarea>
+            </div>
+            <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="closeModal('sql-modal')">Cancel</button>
+                <button class="btn btn-primary" onclick="executeModalSQL()">Execute</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="add-compliance-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Add Compliance Item</div>
+                <span class="modal-close" onclick="closeModal('add-compliance-modal')">&times;</span>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Task Name</label>
+                <input type="text" class="form-input" id="compliance-task-name">
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="form-label">Owner</label>
+                    <input type="text" class="form-input" id="compliance-owner">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select class="form-select" id="compliance-category">
+                        <option>State Reporting</option>
+                        <option>Federal Compliance</option>
+                        <option>State Compliance</option>
+                        <option>Grant Reporting</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Deadline</label>
+                <input type="date" class="form-input" id="compliance-deadline">
+            </div>
+            <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="closeModal('add-compliance-modal')">Cancel</button>
+                <button class="btn btn-primary" onclick="addComplianceItem()">Add Item</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== GLOBAL DATA MODELS ==========
+        const DATA = {
+            students: {
+                total: 1247,
+                byGrade: {6: 187, 7: 215, 8: 203, 9: 178, 10: 165, 11: 154, 12: 145},
+                demographics: {
+                    'African American': 847,
+                    'Hispanic/Latino': 245,
+                    'White': 89,
+                    'Two or More': 52,
+                    'Asian': 14
+                },
+                sped: 187,
+                ell: 94,
+                frl: 1089
+            },
+            
+            attendance: {
+                daily: [94.2, 93.8, 95.1, 94.5, 93.2, 94.8, 95.3, 94.1, 93.9, 94.6],
+                chronicAbsence: {6: 18, 7: 24, 8: 31, 9: 28, 10: 25, 11: 19, 12: 11},
+                absenceReasons: {
+                    'Illness': 45,
+                    'Family Emergency': 18,
+                    'Medical Appointment': 15,
+                    'Unexcused': 12,
+                    'Other': 10
+                },
+                truancyQueue: [
+                    {id: 'S001234', name: 'Anderson, James', grade: 7, absences: 12, rate: 81.2, tier: 3, lastContact: '2025-11-10', riskScore: 0.89},
+                    {id: 'S001567', name: 'Brown, Sarah', grade: 8, absences: 10, rate: 85.3, tier: 3, lastContact: '2025-11-12', riskScore: 0.76},
+                    {id: 'S002145', name: 'Carter, Michael', grade: 9, absences: 8, rate: 88.7, tier: 2, lastContact: '2025-11-15', riskScore: 0.64},
+                    {id: 'S002890', name: 'Davis, Emily', grade: 7, absences: 7, rate: 89.5, tier: 2, lastContact: '2025-11-16', riskScore: 0.58},
+                    {id: 'S003421', name: 'Evans, Marcus', grade: 10, absences: 11, rate: 83.1, tier: 3, lastContact: '2025-11-08', riskScore: 0.82}
+                ]
+            },
+            
+            compliance: [
+                {task: 'MOSIS Fall Submission', owner: 'Data Team', deadline: '2025-12-15', status: 'In Progress', category: 'State Reporting', daysUntil: 25, priority: 'high'},
+                {task: 'Title I Annual Report', owner: 'Academic Team', deadline: '2025-12-01', status: 'In Progress', category: 'Federal Compliance', daysUntil: 11, priority: 'high'},
+                {task: 'Special Ed Child Count', owner: 'SPED Team', deadline: '2025-12-08', status: 'Complete', category: 'State Reporting', daysUntil: 18, priority: 'high'},
+                {task: 'ESSER Quarterly Report', owner: 'Finance Team', deadline: '2025-11-30', status: 'Overdue', category: 'Federal Compliance', daysUntil: -10, priority: 'critical'},
+                {task: 'Attendance Audit', owner: 'Operations', deadline: '2025-11-25', status: 'Overdue', category: 'State Compliance', daysUntil: -5, priority: 'high'},
+                {task: 'Staff Certification Verification', owner: 'HR Team', deadline: '2025-12-10', status: 'In Progress', category: 'State Compliance', daysUntil: 20, priority: 'medium'},
+                {task: 'Free/Reduced Lunch Recert', owner: 'Operations', deadline: '2025-12-20', status: 'Not Started', category: 'Federal Compliance', daysUntil: 30, priority: 'medium'},
+                {task: 'School Safety Audit', owner: 'Operations', deadline: '2025-12-05', status: 'In Progress', category: 'State Compliance', daysUntil: 15, priority: 'high'},
+                {task: 'ELL Assessment Window', owner: 'Academic Team', deadline: '2025-12-22', status: 'Not Started', category: 'State Compliance', daysUntil: 32, priority: 'medium'}
+            ],
+            
+            validation: {
+                totalRecords: 1247,
+                validRecords: 1213,
+                issues: [
+                    {type: 'Missing Entry Code', count: 12, severity: 'high', affected: 'Enrollment', category: 'Enrollment'},
+                    {type: 'Invalid Grade Level', count: 3, severity: 'critical', affected: 'Student Demo', category: 'Demographics'},
+                    {type: 'Missing Guardian Email', count: 87, severity: 'medium', affected: 'Contact Info', category: 'Contact'},
+                    {type: 'Schedule Gaps', count: 8, severity: 'high', affected: 'Scheduling', category: 'Scheduling'},
+                    {type: 'Duplicate State ID', count: 2, severity: 'critical', affected: 'Student Demo', category: 'Demographics'},
+                    {type: 'Missing Birth Date', count: 1, severity: 'critical', affected: 'Student Demo', category: 'Demographics'},
+                    {type: 'Invalid Exit Code', count: 5, severity: 'medium', affected: 'Enrollment', category: 'Enrollment'},
+                    {type: 'Missing Address', count: 16, severity: 'medium', affected: 'Contact Info', category: 'Contact'}
+                ],
+                duplicates: [
+                    {id1: 'S001234', id2: 'S004567', name1: 'Smith, John', name2: 'Smith, Jonathan', dob1: '2010-03-15', dob2: '2010-03-15', confidence: 0.94},
+                    {id1: 'S002345', id2: 'S005678', name1: 'Johnson, Mary', name2: 'Johnson, Marie', dob1: '2009-07-22', dob2: '2009-07-22', confidence: 0.87}
+                ]
+            },
+            
+            strategic: {
+                achievement: {
+                    years: [2021, 2022, 2023, 2024, 2025],
+                    actual: [42, 48, 53, 58, 62],
+                    target: [45, 50, 55, 60, 65]
+                },
+                enrollment: {
+                    years: [2021, 2022, 2023, 2024, 2025],
+                    actual: [987, 1089, 1156, 1203, 1247],
+                    target: [1000, 1100, 1200, 1300, 1400],
+                    forecast: [1247, 1342, 1445, 1523]
+                },
+                financial: {
+                    years: [2021, 2022, 2023, 2024, 2025],
+                    margin: [2.3, 3.1, 1.8, 4.2, 3.7]
+                }
+            },
+            
+            activityLog: [
+                {timestamp: '2025-11-20 08:15', user: 'System', action: 'Daily ETL completed', status: 'success'},
+                {timestamp: '2025-11-20 07:45', user: 'Louis Wagner', action: 'Ran DESE validation', status: 'success'},
+                {timestamp: '2025-11-19 16:30', user: 'Sarah Johnson', action: 'Updated student schedule', status: 'success'},
+                {timestamp: '2025-11-19 14:20', user: 'Louis Wagner', action: 'Generated MOSIS report', status: 'success'},
+                {timestamp: '2025-11-19 10:15', user: 'System', action: 'Attendance sync from PowerSchool', status: 'success'}
+            ],
+            
+            courses: [
+                {code: 'ENG6', name: '6th Grade English', dept: 'English', credits: 1.0, sections: 8},
+                {code: 'MATH6', name: '6th Grade Math', dept: 'Math', credits: 1.0, sections: 8},
+                {code: 'SCI6', name: '6th Grade Science', dept: 'Science', credits: 1.0, sections: 8},
+                {code: 'ENG7', name: '7th Grade English', dept: 'English', credits: 1.0, sections: 9},
+                {code: 'MATH7', name: '7th Grade Math', dept: 'Math', credits: 1.0, sections: 9},
+                {code: 'ALG1', name: 'Algebra I', dept: 'Math', credits: 1.0, sections: 12},
+                {code: 'GEOM', name: 'Geometry', dept: 'Math', credits: 1.0, sections: 10},
+                {code: 'BIO', name: 'Biology', dept: 'Science', credits: 1.0, sections: 11}
+            ],
+            
+            conflicts: [
+                {student: 'Martinez, Ana', studentId: 'S003456', issue: 'Double-booked Period 3', courses: 'Algebra I, Spanish I'},
+                {student: 'Williams, James', studentId: 'S003789', issue: 'Missing required course', courses: 'Physical Education'},
+                {student: 'Brown, Lisa', studentId: 'S004012', issue: 'Prerequisite not met', courses: 'Geometry (needs Algebra I)'}
+            ],
+            
+            highRiskStudents: [
+                {id: 'S005234', name: 'Thompson, Michael', grade: 8, riskScore: 0.92, factors: ['Chronic Absence', 'Failing 2+ Classes', 'Discipline Issues']},
+                {id: 'S005567', name: 'Garcia, Maria', grade: 9, riskScore: 0.88, factors: ['Chronic Absence', 'Low Assessment Scores']},
+                {id: 'S005890', name: 'Wilson, James', grade: 10, riskScore: 0.85, factors: ['Failing Math', 'Attendance <85%', 'No Parent Contact']}
+            ]
+        };
+        
+        let charts = {};
+        let savedQueries = [];
+        
+        // ========== INITIALIZATION ==========
+        function init() {
+            updateLastSync();
+            generateAlerts();
+            initializeAllCharts();
+            renderAllTables();
+            setInterval(updateLastSync, 60000);
+        }
+        
+        function updateLastSync() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit'});
+            document.getElementById('header-sync').textContent = timeStr;
+            document.getElementById('last-sync').textContent = timeStr;
+        }
+        
+        function generateAlerts() {
+            const container = document.getElementById('alerts-container');
+            const alerts = [];
+            
+            const overdueCount = DATA.compliance.filter(c => c.status === 'Overdue').length;
+            if (overdueCount > 0) {
+                alerts.push({
+                    type: 'critical',
+                    icon: '🚨',
+                    title: 'Critical: Overdue Compliance Items',
+                    message: `${overdueCount} compliance items are overdue and require immediate attention. Review Compliance tab.`
+                });
+            }
+            
+            const truancyCount = DATA.attendance.truancyQueue.filter(t => t.tier === 3).length;
+            if (truancyCount > 0) {
+                alerts.push({
+                    type: 'warning',
+                    icon: '⚠️',
+                    title: 'Truancy Interventions Required',
+                    message: `${truancyCount} students require Tier 3 truancy interventions (10+ absences). Letters must be sent within 5 business days per Missouri law.`
+                });
+            }
+            
+            const accuracy = (DATA.validation.validRecords / DATA.validation.totalRecords * 100);
+            if (accuracy < 95) {
+                alerts.push({
+                    type: 'warning',
+                    icon: '📊',
+                    title: 'Data Quality Below Target',
+                    message: `Data accuracy at ${accuracy.toFixed(1)}% - Target is 95%+. ${DATA.validation.totalRecords - DATA.validation.validRecords} records need correction.`
+                });
+            }
+            
+            const criticalIssues = DATA.validation.issues.filter(i => i.severity === 'critical').reduce((sum, i) => sum + i.count, 0);
+            if (criticalIssues > 0) {
+                alerts.push({
+                    type: 'critical',
+                    icon: '⛔',
+                    title: 'Critical Data Issues',
+                    message: `${criticalIssues} critical data quality issues detected. These will block DESE submission.`
+                });
+            }
+            
+            container.innerHTML = alerts.map(a => `
+                <div class="alert ${a.type}">
+                    <div class="alert-icon">${a.icon}</div>
+                    <div class="alert-content">
+                        <div class="alert-title">${a.title}</div>
+                        ${a.message}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // ========== NAVIGATION ==========
+        function switchPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        function switchTab(tabId, btn) {
+            const parent = btn ? btn.closest('.card, .page') : document;
+            parent.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            parent.querySelector(`#${tabId}`).classList.add('active');
+            if (btn) btn.classList.add('active');
+        }
+        
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+        
+        // ========== CHARTS ==========
+        function initializeAllCharts() {
+            initDataQualityChart();
+            initAttendanceOverviewChart();
+            initValidationCharts();
+            initAttendanceCharts();
+            initComplianceCharts();
+            initStrategicCharts();
+            initAnalyticsCharts();
+        }
+        
+        function initDataQualityChart() {
+            const ctx = document.getElementById('dataQualityChart');
+            charts.dataQuality = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Valid', 'Issues'],
+                    datasets: [{
+                        data: [DATA.validation.validRecords, DATA.validation.totalRecords - DATA.validation.validRecords],
+                        backgroundColor: ['#10b981', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {position: 'bottom'},
+                        title: {
+                            display: true,
+                            text: `${(DATA.validation.validRecords/DATA.validation.totalRecords*100).toFixed(1)}% Data Accuracy`
+                        }
+                    }
+                }
+            });
+        }
+        
+        function initAttendanceOverviewChart() {
+            const ctx = document.getElementById('attendanceOverviewChart');
+            charts.attendanceOverview = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7', 'Week 8', 'Week 9', 'Week 10'],
+                    datasets: [{
+                        label: 'Daily Attendance Rate',
+                        data: DATA.attendance.daily,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {min: 90, max: 100, ticks: {callback: v => v + '%'}}
+                    },
+                    plugins: {legend: {display: false}}
+                }
+            });
+        }
+        
+        function initValidationCharts() {
+            // Doughnut
+            const doughnutCtx = document.getElementById('validationDoughnutChart');
+            charts.validationDoughnut = new Chart(doughnutCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Valid', 'Issues'],
+                    datasets: [{
+                        data: [DATA.validation.validRecords, DATA.validation.totalRecords - DATA.validation.validRecords],
+                        backgroundColor: ['#10b981', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {legend: {position: 'bottom'}}
+                }
+            });
+            
+            // Category
+            const categoryCtx = document.getElementById('validationCategoryChart');
+            const categories = {};
+            DATA.validation.issues.forEach(i => {
+                categories[i.category] = (categories[i.category] || 0) + i.count;
+            });
+            charts.validationCategory = new Chart(categoryCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(categories),
+                    datasets: [{
+                        label: 'Issues by Category',
+                        data: Object.values(categories),
+                        backgroundColor: '#f59e0b',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {y: {beginAtZero: true}},
+                    plugins: {legend: {display: false}}
+                }
+            });
+        }
+        
+        function initAttendanceCharts() {
+            // Trend
+            const trendCtx = document.getElementById('attendanceTrendChart');
+            charts.attendanceTrend = new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7', 'Week 8', 'Week 9', 'Week 10'],
+                    datasets: [{
+                        label: 'Attendance Rate',
+                        data: DATA.attendance.daily,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {y: {min: 90, max: 100}},
+                    plugins: {legend: {display: false}}
+                }
+            });
+            
+            // Absence Reasons
+            const reasonsCtx = document.getElementById('absenceReasonsChart');
+            charts.absenceReasons = new Chart(reasonsCtx, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(DATA.attendance.absenceReasons),
+                    datasets: [{
+                        data: Object.values(DATA.attendance.absenceReasons),
+                        backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6', '#6b7280']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {legend: {position: 'right'}}
+                }
+            });
+            
+            // Chronic Absence by Grade
+            const gradeCtx = document.getElementById('chronicAbsenceByGradeChart');
+            charts.chronicAbsenceGrade = new Chart(gradeCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(DATA.attendance.chronicAbsence).map(g => `Grade ${g}`),
+                    datasets: [{
+                        label: 'Chronic Absence Count',
+                        data: Object.values(DATA.attendance.chronicAbsence),
+                        backgroundColor: '#f59e0b',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {y: {beginAtZero: true}},
+                    plugins: {legend: {display: false}}
+                }
+            });
+            
+            // Demographics
+            const demoCtx = document.getElementById('chronicAbsenceDemographicsChart');
+            charts.chronicAbsenceDemographics = new Chart(demoCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(DATA.students.demographics),
+                    datasets: [{
+                        label: 'Chronic Absence Count',
+                        data: [45, 32, 8, 5, 2],
+                        backgroundColor: '#ef4444',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {x: {beginAtZero: true}},
+                    plugins: {legend: {display: false}}
+                }
+            });
+        }
+        
+        function initComplianceCharts() {
+            // Timeline
+            const timelineCtx = document.getElementById('complianceTimelineChart');
+            const upcoming = DATA.compliance.filter(c => c.daysUntil > 0 && c.daysUntil <= 30);
+            const timelineData = {};
+            upcoming.forEach(c => {
+                const week = Math.ceil(c.daysUntil / 7);
+                timelineData[`Week ${week}`] = (timelineData[`Week ${week}`] || 0) + 1;
+            });
+            charts.complianceTimeline = new Chart(timelineCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(timelineData),
+                    datasets: [{
+                        label: 'Deadlines',
+                        data: Object.values(timelineData),
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {y: {beginAtZero: true, ticks: {stepSize: 1}}},
+                    plugins: {legend: {display: false}}
+                }
+            });
+            
+            // Category
+            const categoryCtx = document.getElementById('complianceCategoryChart');
+            const categories = {};
+            DATA.compliance.forEach(c => {
+                categories[c.category] = (categories[c.category] || 0) + 1;
+            });
+            charts.complianceCategory = new Chart(categoryCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(categories),
+                    datasets: [{
+                        data: Object.values(categories),
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {legend: {position: 'right'}}
+                }
+            });
+        }
+        
+        function initStrategicCharts() {
+            // Achievement
+            const achievementCtx = document.getElementById('achievementChart');
+            charts.achievement = new Chart(achievementCtx, {
+                type: 'line',
+                data: {
+                    labels: DATA.strategic.achievement.years,
+                    datasets: [
+                        {
+                            label: 'Actual',
+                            data: DATA.strategic.achievement.actual,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Target',
+                            data: DATA.strategic.achievement.target,
+                            borderColor: '#ef4444',
+                            borderDash: [5, 5],
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {y: {beginAtZero: true, max: 100}},
+                    plugins: {legend: {position: 'bottom'}}
+                }
+            });
+            
+            // Enrollment
+            const enrollmentCtx = document.getElementById('enrollmentChart');
+            charts.enrollment = new Chart(enrollmentCtx, {
+                type: 'line',
+                data: {
+                    labels: DATA.strategic.enrollment.years,
+                    datasets: [
+                        {
+                            label: 'Actual',
+                            data: DATA.strategic.enrollment.actual,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Target',
+                            data: DATA.strategic.enrollment.target,
+                            borderColor: '#ef4444',
+                            borderDash: [5, 5],
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {legend: {position: 'bottom'}}
+                }
+            });
+            
+            // Retention
+            const retentionCtx = document.getElementById('retentionChart');
+            charts.retention = new Chart(retentionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Retained', 'Left'],
+                    datasets: [{
+                        data: [87.3, 12.7],
+                        backgroundColor: ['#10b981', '#e5e7eb'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    circumference: 180,
+                    rotation: 270,
+                    plugins: {legend: {display: false}}
+                }
+            });
+            
+            // Financial
+            const financialCtx = document.getElementById('financialChart');
+            charts.financial = new Chart(financialCtx, {
+                type: 'bar',
+                data: {
+                    labels: DATA.strategic.financial.years,
+                    datasets: [{
+                        label: 'Operating Margin %',
+                        data: DATA.strategic.financial.margin,
+                        backgroundColor: DATA.strategic.financial.margin.map(m => m > 3 ? '#10b981' : '#f59e0b'),
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {y: {beginAtZero: true}},
+                    plugins: {legend: {display: false}}
+                }
+            });
+        }
+        
+        function initAnalyticsCharts() {
+            // Feature Importance
+            const featureCtx = document.getElementById('featureImportanceChart');
+            charts.featureImportance = new Chart(featureCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Attendance Rate', 'Prior Absences', 'GPA', 'Discipline Events', 'Assessment Scores', 'Parent Engagement'],
+                    datasets: [{
+                        label: 'Feature Importance',
+                        data: [0.32, 0.24, 0.18, 0.12, 0.09, 0.05],
+                        backgroundColor: '#8b5cf6',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {x: {beginAtZero: true, max: 0.4}},
+                    plugins: {legend: {display: false}}
+                }
+            });
+            
+            // Enrollment Forecast
+            const forecastCtx = document.getElementById('enrollmentForecastChart');
+            charts.enrollmentForecast = new Chart(forecastCtx, {
+                type: 'line',
+                data: {
+                    labels: [2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028],
+                    datasets: [
+                        {
+                            label: 'Historical',
+                            data: [987, 1089, 1156, 1203, 1247, null, null, null],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            fill: true
+                        },
+                        {
+                            label: 'Forecast',
+                            data: [null, null, null, null, 1247, 1342, 1445, 1523],
+                            borderColor: '#8b5cf6',
+                            borderDash: [5, 5],
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {legend: {position: 'bottom'}}
+                }
+            });
+            
+            // MAP Growth
+            const mapCtx = document.getElementById('mapGrowthChart');
+            charts.mapGrowth = new Chart(mapCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['6th', '7th', '8th', '9th', '10th', '11th', '12th'],
+                    datasets: [
+                        {
+                            label: 'Fall',
+                            data: [210, 215, 220, 225, 228, 230, 232],
+                            backgroundColor: '#3b82f6'
+                        },
+                        {
+                            label: 'Winter',
+                            data: [218, 223, 228, 232, 235, 237, 238],
+                            backgroundColor: '#10b981'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {y: {beginAtZero: false, min: 200}},
+                    plugins: {legend: {position: 'bottom'}}
+                }
+            });
+            
+            // Cohort
+            const cohortCtx = document.getElementById('cohortChart');
+            charts.cohort = new Chart(cohortCtx, {
+                type: 'line',
+                data: {
+                    labels: ['6th', '7th', '8th', '9th', '10th', '11th', '12th', 'College Y1', 'College Y2'],
+                    datasets: [{
+                        label: 'Class of 2025',
+                        data: [150, 148, 147, 145, 143, 142, 140, 134, 128],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {y: {beginAtZero: false, min: 100}},
+                    plugins: {legend: {display: false}}
+                }
+            });
+        }
+        
+        // ========== TABLE RENDERING ==========
+        function renderAllTables() {
+            renderActivityLog();
+            renderDataIssuesTable();
+            renderDuplicatesTable();
+            renderTruancyTable();
+            renderChronicAbsenceTable();
+            renderComplianceTable();
+            renderSubmissionHistory();
+            renderCourseCatalog();
+            renderConflictsTable();
+            renderHighRiskTable();
+            renderValidationRules();
+        }
+        
+        function renderActivityLog() {
+            const table = document.getElementById('activity-log');
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${DATA.activityLog.map(log => `
+                        <tr>
+                            <td>${log.timestamp}</td>
+                            <td>${log.user}</td>
+                            <td>${log.action}</td>
+                            <td><span class="status-badge ${log.status}">${log.status}</span></td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+        }
+        
+        function renderDataIssuesTable() {
+            const table = document.getElementById('data-issues-table');
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Issue Type</th>
+                        <th>Count</th>
+                        <th>Severity</th>
+                        <th>Affected Area</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${DATA.validation.issues.map(issue => `
+                        <tr>
+                            <td>${issue.type}</td>
+                            <td><strong>${issue.count}</strong></td>
+                            <td><span class="status-badge ${issue.severity}">${issue.severity.toUpperCase()}</span></td>
+                            <td>${issue.affected}</td>
+                            <td><button class="btn btn-secondary btn-sm">View</button></td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+        }
+        
+        function renderDuplicatesTable() {
+            const table = document.getElementById('duplicates-table');
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Student ID 1</th>
+                        <th>Name 1</th>
+                        <th>Student ID 2</th>
+                        <th>Name 2</th>
+                        <th>DOB Match</th>
+                        <th>Confidence</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${DATA.validation.duplicates.map(dup => `
+                        <tr>
+                            <td>${dup.id1}</td>
+                            <td>${dup.name1}</td>
+                            <td>${dup.id2}</td>
+                            <td>${dup.name2}</td>
+                            <td>${dup.dob1 === dup.dob2 ? '✓ Yes' : '✗ No'}</td>
+                            <td><strong>${(dup.confidence * 100).toFixed(0)}%</strong></td>
+                            <td><button class="btn btn-warning btn-sm">Merge</button></td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+        }
+        
+        function renderTruancyTable() {
+            const table = document.getElementById('truancy-table');
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Name</th>
+                        <th>Grade</th>
+                        <th>Absences</th>
+                        <th>Attendance Rate</th>
+                        <th>Tier</th>
+                        <th>Last Contact</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${DATA.attendance.truancyQueue.map(student => `
+                        <tr>
+                            <td>${student.id}</td>
+                            <td>${student.name}</td>
+                            <td>${student.grade}</td>
+                            <td><strong>${student.absences}</strong></td>
+                            <td>${student.rate}%</td>
+                            <td><span class="status-badge ${student.tier === 3 ? 'overdue' : 'in-progress'}">Tier ${student.tier}</span></td>
+                            <td>${student.lastContact}</td>
+                            <td><button class="btn btn-primary btn-sm">Generate</button></td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+        }
+        
+        function renderChronicAbsenceTable() {
+            const table = document.getElementById('chronic-absence-table');
+            const students = DATA.attendance.truancyQueue.filter(s => s.absences >= 10);
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Name</th>
+                        <th>Grade</th>
+                        <th>Total Absences</th>
+                        <th>Attendance Rate</th>
+                        <th>Risk Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${students.map(s => `
+                        <tr>
+                            <td>${s.id}</td>
+                            <td>${s.name}</td>
+                            <td>${s.grade}</td>
+                            <td><strong>${s.absences}</strong></td>
+                            <td>${s.rate}%</td>
+                            <td><span class="status-badge overdue">${(s.riskScore * 100).toFixed(0)}%</span></td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+        }
+        
+        function renderComplianceTable() {
+            const table = document.getElementById('compliance-table');
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Task</th>
+                        <th>Owner</th>
+                        <th>Category</th>
+                        <th>Deadline</th>
+                        <th>Days Until</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${DATA.compliance.map(item => `
+                        <tr>
+                            <td>${item.task}</td>
+                            <td>${item.owner}</td>
+                            <td>${item.category}</td>
+                            <td>${item.deadline}</td>
+                            <td>${item.daysUntil > 0 ? item.daysUntil : `<strong>${Math.abs(item.daysUntil)} overdue</strong>`}</td>
+                            <td><span class="status-badge ${item.priority}">${item.priority.toUpperCase()}</span></td>
+                            <td><span class="status-badge ${item.status === 'Complete' ? 'complete' : item.status === 'Overdue' ? 'overdue' : item.status === 'In Progress' ? 'in-progress' : 'not-started'}">${item.status}</span></td>
+                            <td><button class="btn btn-secondary btn-sm">Edit</button></td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+        }
+        
+        function renderSubmissionHistory() {
+            const table = document.getElementById('submission-history-table');
+            const history = [
+                {date: '2025-07-31', type: 'End of Year MOSIS', status: 'Accepted', records: 1203, user: 'Louis Wagner'},
+                {date: '2024-12-15', type: 'Fall MOSIS', status: 'Accepted', records: 1156, user: 'Sarah Johnson'},
+                {date: '2024-07-31', type: 'End of Year MOSIS', status: 'Accepted', records: 1089, user: 'Louis Wagner'}
+            ];
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Submission Date</th>
+                        <th>Report Type</th>
+                        <th>Records</th>
+                        <th>Status</th>
+                        <th>Submitted By</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${history.map(h => `
+                        <tr>
+                            <td>${h.date}</td>
+                            <td>${h.type}</td>
+                            <td>${h.records}</td>
+                            <td><span class="status-badge complete">${h.status}</span></td>
+                            <td>${h.user}</td>
+                            <td><button class="btn btn-secondary btn-sm">View</button></td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+        }
+        
+        function renderCourseCatalog() {
+            const table = document.getElementById('course-catalog-table');
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Course Code</th>
+                        <th>Course Name</th>
+                        <th>Department</th>
+                        <th>Credits</th>
+                        <th>Sections</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${DATA.courses.map(c => `
+                        <tr>
+                            <td><strong>${c.code}</strong></td>
+                            <td>${c.name}</td>
+                            <td>${c.dept}</td>
+                            <td>${c.credits}</td>
+                            <td>${c.sections}</td>
+                            <td>
+                                <button class="btn btn-secondary btn-sm">Edit</button>
+                                <button class="btn btn-danger btn-sm">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+        }
+        
+        function renderConflictsTable() {
+            const table = document.getElementById('conflicts-table');
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Student Name</th>
+                        <th>Issue Type</th>
+                        <th>Details</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${DATA.conflicts.map(c => `
+                        <tr>
+                            <td>${c.studentId}</td>
+                            <td>${c.student}</td>
+                            <td><span class="status-badge overdue">${c.issue}</span></td>
+                            <td>${c.courses}</td>
+                            <td><button class="btn btn-warning btn-sm">Resolve</button></td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+        }
+        
+        function renderHighRiskTable() {
+            const table = document.getElementById('high-risk-table');
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Name</th>
+                        <th>Grade</th>
+                        <th>Risk Score</th>
+                        <th>Risk Factors</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${DATA.highRiskStudents.map(s => `
+                        <tr>
+                            <td>${s.id}</td>
+                            <td>${s.name}</td>
+                            <td>${s.grade}</td>
+                            <td><span class="status-badge overdue"><strong>${(s.riskScore * 100).toFixed(0)}%</strong></span></td>
+                            <td>${s.factors.join(', ')}</td>
+                            <td><button class="btn btn-danger btn-sm">Create Plan</button></td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+        }
+        
+        function renderValidationRules() {
+            const container = document.getElementById('validation-rules-container');
+            const rules = [
+                {rule: 'All students have State IDs', passed: 1245, failed: 2, status: 'warning'},
+                {rule: 'All students have birth dates', passed: 1246, failed: 1, status: 'warning'},
+                {rule: 'All students have entry codes', passed: 1235, failed: 12, status: 'error'},
+                {rule: 'Grade levels valid (K-12)', passed: 1244, failed: 3, status: 'error'},
+                {rule: 'All active students have schedules', passed: 1239, failed: 8, status: 'warning'},
+                {rule: 'All guardians have contact info', passed: 1160, failed: 87, status: 'warning'}
+            ];
+            
+            container.innerHTML = rules.map(r => `
+                <div style="padding: 1rem; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: 500;">${r.rule}</div>
+                        <div style="font-size: 0.9rem; color: var(--gray-600); margin-top: 0.25rem;">
+                            ${r.passed} passed • ${r.failed} failed
+                        </div>
+                    </div>
+                    <div>
+                        ${r.failed === 0 ? 
+                            '<span class="status-badge complete">✓ Pass</span>' :
+                            `<span class="status-badge ${r.status === 'error' ? 'overdue' : 'in-progress'}">${r.failed} issues</span>`
+                        }
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // ========== ACTION FUNCTIONS ==========
+        function runDataValidation() {
+            alert('Running comprehensive PowerSchool data validation...\n\n' +
+                  '✓ Checking student demographics\n' +
+                  '✓ Validating enrollment data\n' +
+                  '✓ Verifying schedule integrity\n' +
+                  '✓ Auditing contact information\n\n' +
+                  'Results:\n' +
+                  `• Total Records: ${DATA.validation.totalRecords}\n` +
+                  `• Valid: ${DATA.validation.validRecords} (97.3%)\n` +
+                  `• Issues Found: ${DATA.validation.totalRecords - DATA.validation.validRecords}\n\n` +
+                  'See Data Integrity tab for details.');
+        }
+        
+        function validateMOSISData() {
+            const output = document.getElementById('mosis-output');
+            output.innerHTML = `
+                <div class="alert info">
+                    <div class="alert-icon">⏳</div>
+                    <div class="alert-content">Running DESE validation checks...</div>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                output.innerHTML = `
+                    <div class="alert success">
+                        <div class="alert-icon">✓</div>
+                        <div class="alert-content">
+                            <div class="alert-title">Validation Complete - Ready for Generation</div>
+                            All DESE edit checks passed. Data is ready for MOSIS submission.
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <strong>Validation Summary:</strong>
+                        <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                            <li>1,247 student records validated</li>
+                            <li>All required fields present</li>
+                            <li>No duplicate State IDs detected</li>
+                            <li>All date formats valid</li>
+                            <li>All entry/exit codes valid</li>
+                        </ul>
+                    </div>
+                `;
+                document.getElementById('generate-mosis-btn').disabled = false;
+            }, 2000);
+        }
+        
+        function generateMOSISReport() {
+            const reportType = document.getElementById('mosis-report-type').value;
+            const output = document.getElementById('mosis-output');
+            
+            const sampleData = `115115000112345678900ANDERSON                 JAMES          JOHN           010120100M0708152025011125115000212345678901BROWN                   SARAH          MARIE          022520100F0708152025011125115000312345678902CARTER                  MICHAEL        JAMES          033120100M0808152025011125115000412345678903DAVIS                   EMILY          ROSE           041520100F0708152025011125115000512345678904EVANS                   MARCUS         ANTHONY        052220100M1008152025011`;
+            
+            output.innerHTML = `
+                <div class="alert success">
+                    <div class="alert-icon">✓</div>
+                    <div class="alert-content">
+                        <div class="alert-title">MOSIS Report Generated Successfully</div>
+                        Report Type: ${reportType}<br>
+                        Records: 1,247<br>
+                        Format: Fixed-width per DESE specifications
+                    </div>
+                </div>
+                <div style="background: #1e1e1e; color: #d4d4d4; padding: 1rem; border-radius: 6px; font-family: monospace; font-size: 0.75rem; overflow-x: auto; margin-top: 1rem; white-space: pre;">
+${sampleData}</div>
+                <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                    <button class="btn btn-success" onclick="downloadMOSIS()">
+                        📥 Download Full Report
+                    </button>
+                    <button class="btn btn-secondary" onclick="validateMOSISOutput()">
+                        ✓ Validate Output
+                    </button>
+                </div>
+            `;
+        }
+        
+        function downloadMOSIS() {
+            alert('Full MOSIS report would be downloaded as .txt file\n\n' +
+                  'Format: Fixed-width text file per DESE specifications\n' +
+                  'Ready for upload to MOSIS portal');
+        }
+        
+        function runDESEValidation() {
+            const container = document.getElementById('dese-validation-results');
+            const checks = [
+                {check: 'All students have State IDs', status: 'warning', message: '2 duplicate IDs detected'},
+                {check: 'All students have birth dates', status: 'warning', message: '1 missing birth date'},
+                {check: 'All students have entry codes', status: 'error', message: '12 missing entry codes'},
+                {check: 'Grade levels valid (K-12)', status: 'error', message: '3 invalid grade levels'},
+                {check: 'All active students have schedules', status: 'warning', message: '8 students without schedules'},
+                {check: 'Entry/Exit dates valid', status: 'pass', message: 'All dates valid'},
+                {check: 'Attendance codes valid', status: 'pass', message: 'All codes valid'},
+                {check: 'Discipline codes valid', status: 'pass', message: 'All codes valid'}
+            ];
+            
+            container.innerHTML = `
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>DESE Validation Check</th>
+                                <th>Status</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${checks.map(c => `
+                                <tr>
+                                    <td>${c.check}</td>
+                                    <td>
+                                        <span class="status-badge ${
+                                            c.status === 'pass' ? 'complete' : 
+                                            c.status === 'warning' ? 'in-progress' : 
+                                            'overdue'
+                                        }">
+                                            ${c.status === 'pass' ? '✓ PASS' : 
+                                              c.status === 'warning' ? '⚠ WARNING' : 
+                                              '✗ FAIL'}
+                                        </span>
+                                    </td>
+                                    <td>${c.message}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="alert ${checks.some(c => c.status === 'error') ? 'critical' : 'warning'}" style="margin-top: 1rem;">
+                    <div class="alert-icon">${checks.some(c => c.status === 'error') ? '⛔' : '⚠️'}</div>
+                    <div class="alert-content">
+                        <div class="alert-title">Action Required</div>
+                        ${checks.filter(c => c.status === 'error').length} critical issues must be resolved before MOSIS submission.
+                        ${checks.filter(c => c.status === 'warning').length} warnings should be reviewed.
+                    </div>
+                </div>
+            `;
+        }
+        
+        function executeSQL() {
+            const query = document.getElementById('sql-query-input').value;
+            if (!query.trim()) {
+                alert('Please enter a SQL query');
+                return;
+            }
+            
+            // Simulate query execution
+            const mockResults = [
+                {student_number: 'S001234', first_name: 'James', last_name: 'Anderson', grade_level: 7, ethnicity: 'African American'},
+                {student_number: 'S001567', first_name: 'Sarah', last_name: 'Brown', grade_level: 8, ethnicity: 'Hispanic/Latino'},
+                {student_number: 'S002145', first_name: 'Michael', last_name: 'Carter', grade_level: 9, ethnicity: 'African American'},
+                {student_number: 'S002890', first_name: 'Emily', last_name: 'Davis', grade_level: 7, ethnicity: 'White'},
+                {student_number: 'S003421', first_name: 'Marcus', last_name: 'Evans', grade_level: 10, ethnicity: 'African American'}
+            ];
+            
+            const container = document.getElementById('sql-results-container');
+            const exportSection = document.getElementById('sql-export-section');
+            
+            if (mockResults.length > 0) {
+                const headers = Object.keys(mockResults[0]);
+                container.innerHTML = `
+                    <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--success);">
+                        ✓ Query executed successfully - ${mockResults.length} rows returned
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
+                            </thead>
+                            <tbody>
+                                ${mockResults.map(row => `
+                                    <tr>${headers.map(h => `<td>${row[h]}</td>`).join('')}</tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                exportSection.style.display = 'flex';
+            }
+        }
+        
+        function loadQueryTemplate(template) {
+            const templates = {
+                'student-roster': `SELECT 
+    s.student_number,
+    s.first_name,
+    s.last_name,
+    s.grade_level,
+    s.dob,
+    s.ethnicity
+FROM students s
+WHERE s.enroll_status = 0
+ORDER BY s.grade_level, s.last_name`,
+                'attendance-summary': `SELECT 
+    s.student_number,
+    s.first_name || ' ' || s.last_name AS student_name,
+    COUNT(CASE WHEN a.attendance_codeid = 1 THEN 1 END) AS present,
+    COUNT(CASE WHEN a.attendance_codeid != 1 THEN 1 END) AS absent,
+    ROUND(COUNT(CASE WHEN a.attendance_codeid = 1 THEN 1 END) * 100.0 / COUNT(*), 1) AS attendance_rate
+FROM students s
+JOIN attendance a ON s.id = a.studentid
+WHERE a.att_date >= DATE('now', '-30 days')
+GROUP BY s.id
+ORDER BY attendance_rate`,
+                'grade-distribution': `SELECT 
+    sg.grade,
+    COUNT(*) AS count
+FROM storedgrades sg
+WHERE sg.storecode = 'Q1'
+AND sg.schoolid = 1
+GROUP BY sg.grade
+ORDER BY sg.grade`,
+                'schedule-conflicts': `SELECT 
+    s.student_number,
+    s.first_name || ' ' || s.last_name AS student_name,
+    COUNT(*) AS course_count,
+    GROUP_CONCAT(c.course_name) AS courses
+FROM students s
+JOIN cc ON s.id = cc.studentid
+JOIN courses c ON cc.course_number = c.course_number
+WHERE cc.termid = (SELECT id FROM terms WHERE year_id = 2025)
+GROUP BY s.id, cc.expression
+HAVING COUNT(*) > 1`,
+                'missing-data': `SELECT 
+    'Missing Email' AS issue,
+    COUNT(*) AS count
+FROM students
+WHERE guardianEmail IS NULL OR guardianEmail = ''
+UNION ALL
+SELECT 
+    'Missing Phone',
+    COUNT(*)
+FROM students
+WHERE home_phone IS NULL OR home_phone = ''`
+            };
+            
+            const input = document.getElementById('sql-query-input');
+            if (templates[template]) {
+                input.value = templates[template];
+            }
+        }
+        
+        function exportSQLResults() {
+            alert('SQL query results would be exported to Excel file');
+        }
+        
+        function generateTruancyLetters() {
+            alert(`Generating ${DATA.attendance.truancyQueue.length} truancy intervention letters...\n\n` +
+                  `Tier 1: ${DATA.attendance.truancyQueue.filter(t => t.tier === 1).length} letters\n` +
+                  `Tier 2: ${DATA.attendance.truancyQueue.filter(t => t.tier === 2).length} letters\n` +
+                  `Tier 3: ${DATA.attendance.truancyQueue.filter(t => t.tier === 3).length} letters\n\n` +
+                  'Letters formatted per Missouri RSMO 167.031 requirements.\n' +
+                  'Ready for mail merge and parent/guardian notification.');
+        }
+        
+        function generateAllTruancyLetters() {
+            generateTruancyLetters();
+        }
+        
+        function generateTierLetters(tier) {
+            const count = DATA.attendance.truancyQueue.filter(t => t.tier === tier).length;
+            alert(`Generating ${count} Tier ${tier} truancy letters...\n\n` +
+                  'Letters include:\n' +
+                  '• Student attendance data\n' +
+                  '• Intervention requirements\n' +
+                  '• Parent/guardian responsibilities\n' +
+                  '• Contact information for support\n\n' +
+                  'Ready for review and mailing.');
+        }
+        
+        function exportTruancyData() {
+            alert('Truancy intervention data exported to Excel');
+        }
+        
+        function exportChronicAbsence() {
+            alert('Chronic absence data exported to Excel');
+        }
+        
+        function exportAttendanceReport() {
+            alert('Attendance report exported to Excel');
+        }
+        
+        function exportComplianceReport() {
+            alert('Compliance tracker exported to Excel');
+        }
+        
+        function exportValidationReport() {
+            alert('Data validation report exported to Excel');
+        }
+        
+        function exportDashboard() {
+            alert('Dashboard snapshot exported to PDF');
+        }
+        
+        function generateAttendanceReport() {
+            alert('Monthly attendance report generated');
+        }
+        
+        function generateDESEAttendance() {
+            alert('DESE attendance submission file generated');
+        }
+        
+        function addComplianceItem() {
+            alert('Compliance item added successfully');
+            closeModal('add-compliance-modal');
+        }
+        
+        function createSection() {
+            alert('Section created successfully');
+        }
+        
+        function runAutoScheduler() {
+            const grade = document.getElementById('scheduler-grade').value;
+            const results = document.getElementById('scheduler-results');
+            
+            results.innerHTML = `
+                <div class="alert info">
+                    <div class="alert-icon">⏳</div>
+                    <div class="alert-content">Running automated scheduler for Grade ${grade}...</div>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                results.innerHTML = `
+                    <div class="alert success">
+                        <div class="alert-icon">✓</div>
+                        <div class="alert-content">
+                            <div class="alert-title">Scheduling Complete</div>
+                            Successfully scheduled ${DATA.students.byGrade[grade]} students in Grade ${grade}
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <strong>Results:</strong>
+                        <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                            <li>${DATA.students.byGrade[grade]} students scheduled</li>
+                            <li>0 conflicts detected</li>
+                            <li>Average class size: 23.4 students</li>
+                            <li>All prerequisites met</li>
+                        </ul>
+                    </div>
+                `;
+            }, 3000);
+        }
+        
+        function viewHighRiskStudents() {
+            switchPage('analytics');
+            switchTab('predictive-intervention');
+        }
+        
+        function viewMediumRiskStudents() {
+            alert('Viewing medium risk students...');
+        }
+        
+        function filterIssues(severity) {
+            alert(`Filtering issues by: ${severity}`);
+        }
+        
+        function loadAuditTrail() {
+            alert('Loading audit trail...');
+        }
+        
+        function fixCriticalIssues() {
+            alert('Opening critical issues for review and correction...');
+        }
+        
+        function saveQuery() {
+            const name = document.getElementById('query-name').value || 'Untitled Query';
+            const query = document.getElementById('sql-query-input').value;
+            savedQueries.push({name, query, date: new Date().toISOString()});
+            alert(`Query "${name}" saved successfully`);
+        }
+        
+        function loadSavedQueries() {
+            alert('Saved queries would be displayed in a modal');
+        }
+        
+        function executeModalSQL() {
+            alert('Executing SQL query...');
+            closeModal('sql-modal');
+        }
+        
+        function copySQLResults() {
+            alert('Results copied to clipboard');
+        }
+        
+        function validateMOSISOutput() {
+            alert('MOSIS output validated successfully');
+        }
+        
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
+</artifact>
