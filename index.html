@@ -104,23 +104,22 @@
             max-width: 1600px;
             margin: 0 auto;
             display: flex;
+            flex-wrap: wrap;
             gap: 0;
-            overflow-x: auto;
         }
-        
+
         .nav-btn {
-            padding: 1rem 1.5rem;
+            padding: 0.75rem 1rem;
             border: none;
             background: transparent;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             white-space: nowrap;
-            transition: all 0.2s;
             border-bottom: 3px solid transparent;
             font-weight: 500;
             color: var(--gray-600);
         }
-        
+
         .nav-btn:hover {
             background: var(--gray-50);
             color: var(--primary);
@@ -1049,8 +1048,7 @@
             <button class="nav-btn" onclick="switchPage('sql-query')">💾 SQL Query Builder</button>
             <button class="nav-btn" onclick="switchPage('scheduling')">📚 Scheduling</button>
             <button class="nav-btn" onclick="switchPage('strategic')">📈 Strategic KPIs</button>
-            <button class="nav-btn" onclick="switchPage('analytics')">🔬 Advanced Analytics</button>
-            <button class="nav-btn" onclick="switchPage('analytics-3d')" style="background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%); color: white;">🧊 3D Analytics Lab</button>
+            <button class="nav-btn" onclick="switchPage('analytics')">🔬 Analytics</button>
         </div>
     </div>
     
@@ -1061,26 +1059,35 @@
             
             <div class="dashboard-grid">
                 <div class="kpi-card">
-                    <div class="kpi-label">System Health Score</div>
+                    <div class="kpi-label">Data Integrity Score</div>
                     <div class="kpi-value" id="system-health">97.3%</div>
                     <div class="kpi-change">
                         ↑ 2.1% from last month
                     </div>
-                </div>
-                
-                <div class="kpi-card" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%);">
-                    <div class="kpi-label">Average Daily Attendance</div>
-                    <div class="kpi-value" id="avg-attendance">94.2%</div>
-                    <div class="kpi-change">
-                        ↑ 0.8% from last week
+                    <div style="font-size: 0.75rem; opacity: 0.9; margin-top: 0.5rem;">
+                        % of student records passing all validation rules
                     </div>
                 </div>
-                
+
+                <div class="kpi-card" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%);">
+                    <div class="kpi-label">Average Daily Attendance (ADA)</div>
+                    <div class="kpi-value" id="avg-attendance">94.2%</div>
+                    <div class="kpi-change">
+                        ↑ 0.8% from last week • Target: 95%
+                    </div>
+                    <div style="font-size: 0.75rem; opacity: 0.9; margin-top: 0.5rem;">
+                        Students present ÷ enrolled × 100
+                    </div>
+                </div>
+
                 <div class="kpi-card" style="background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);">
                     <div class="kpi-label">Compliance Items Due</div>
                     <div class="kpi-value" id="compliance-due">9</div>
                     <div class="kpi-change">
                         7 upcoming • 2 overdue
+                    </div>
+                    <div style="font-size: 0.75rem; opacity: 0.9; margin-top: 0.5rem;">
+                        State/federal reporting deadlines within 30 days
                     </div>
                 </div>
             </div>
@@ -1093,6 +1100,9 @@
                             Refresh
                         </button>
                     </div>
+                    <p style="font-size: 0.8rem; color: var(--gray-600); margin-bottom: 0.75rem;">
+                        Validation scores for required data fields. Higher % = fewer missing or invalid records.
+                    </p>
                     <div class="chart-container">
                         <canvas id="dataQualityChart"></canvas>
                     </div>
@@ -1137,18 +1147,19 @@
                 </div>
                 
                 <div class="card">
-                    <div class="card-title">⚡ System Status</div>
+                    <div class="card-title">⚡ System Integrations</div>
+                    <p style="font-size: 0.8rem; color: var(--gray-600); margin-bottom: 0.75rem;">Real-time data sync status with external platforms</p>
                     <div class="metric">
                         <span class="metric-label">PowerSchool SIS</span>
-                        <span class="status-badge complete">● Online</span>
+                        <span class="status-badge complete">● Active</span>
                     </div>
                     <div class="metric">
                         <span class="metric-label">SchoolMint Grow</span>
-                        <span class="status-badge complete">● Synced</span>
+                        <span class="status-badge complete">● Active</span>
                     </div>
                     <div class="metric">
                         <span class="metric-label">Illuminate DnA</span>
-                        <span class="status-badge complete">● Connected</span>
+                        <span class="status-badge complete">● Active</span>
                     </div>
                     <div class="metric">
                         <span class="metric-label">Schoolytics</span>
@@ -1156,15 +1167,15 @@
                     </div>
                     <div class="metric">
                         <span class="metric-label">DeansList</span>
-                        <span class="status-badge complete">● Online</span>
+                        <span class="status-badge complete">● Active</span>
                     </div>
                     <div class="metric">
-                        <span class="metric-label">MOSIS/DRC Portal</span>
-                        <span class="status-badge complete">● Connected</span>
+                        <span class="metric-label">MOSIS Portal</span>
+                        <span class="status-badge complete">● Active</span>
                     </div>
-                    <div class="metric">
-                        <span class="metric-label">Last ETL Run</span>
-                        <span class="metric-value" style="font-size: 0.9rem;" id="last-sync">3:00 AM</span>
+                    <div class="metric" style="border-top: 1px solid var(--gray-200); padding-top: 0.75rem; margin-top: 0.5rem;">
+                        <span class="metric-label">Last Data Sync</span>
+                        <span class="metric-value" style="font-size: 0.9rem;" id="last-sync">Today 3:00 AM</span>
                     </div>
                 </div>
             </div>
@@ -1331,10 +1342,13 @@
                     </div>
                     
                     <div class="card">
-                        <div class="card-title">Chronic Absence</div>
+                        <div class="card-title">Chronically Absent Students</div>
                         <div class="kpi-value" style="color: var(--warning);">156</div>
-                        <div style="margin-top: 1rem; font-size: 0.9rem; color: var(--gray-600);">
+                        <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--gray-600);">
                             12.5% of student body
+                        </div>
+                        <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--gray-500); border-top: 1px solid var(--gray-200); padding-top: 0.5rem;">
+                            Definition: Missed 10%+ of school days (excused or unexcused)
                         </div>
                         <button class="btn btn-warning btn-sm" style="margin-top: 0.5rem;" onclick="switchTab('chronic-absence')">
                             View Details
@@ -1408,25 +1422,31 @@
                 
                 <div class="dashboard-grid">
                     <div class="card">
-                        <div class="card-title">Tier 1 (5-6 absences)</div>
+                        <div class="card-title">Tier 1: Initial Notice</div>
                         <div class="kpi-value" style="color: var(--warning);">8</div>
-                        <button class="btn btn-warning btn-sm" style="margin-top: 1rem;" onclick="generateTierLetters(1)">
+                        <div style="font-size: 0.8rem; color: var(--gray-600); margin: 0.5rem 0;">5-6 unexcused absences</div>
+                        <div style="font-size: 0.75rem; color: var(--gray-500);">Parent notification letter required</div>
+                        <button class="btn btn-warning btn-sm" style="margin-top: 0.75rem;" onclick="generateTierLetters(1)">
                             Generate Letters
                         </button>
                     </div>
-                    
+
                     <div class="card">
-                        <div class="card-title">Tier 2 (7-9 absences)</div>
+                        <div class="card-title">Tier 2: Warning</div>
                         <div class="kpi-value" style="color: var(--warning);">10</div>
-                        <button class="btn btn-warning btn-sm" style="margin-top: 1rem;" onclick="generateTierLetters(2)">
+                        <div style="font-size: 0.8rem; color: var(--gray-600); margin: 0.5rem 0;">7-9 unexcused absences</div>
+                        <div style="font-size: 0.75rem; color: var(--gray-500);">Parent conference + attendance plan</div>
+                        <button class="btn btn-warning btn-sm" style="margin-top: 0.75rem;" onclick="generateTierLetters(2)">
                             Generate Letters
                         </button>
                     </div>
-                    
+
                     <div class="card">
-                        <div class="card-title">Tier 3 (10+ absences)</div>
+                        <div class="card-title">Tier 3: Legal Referral</div>
                         <div class="kpi-value" style="color: var(--danger);">5</div>
-                        <button class="btn btn-danger btn-sm" style="margin-top: 1rem;" onclick="generateTierLetters(3)">
+                        <div style="font-size: 0.8rem; color: var(--gray-600); margin: 0.5rem 0;">10+ unexcused absences</div>
+                        <div style="font-size: 0.75rem; color: var(--gray-500);">Juvenile court/Family Court referral</div>
+                        <button class="btn btn-danger btn-sm" style="margin-top: 0.75rem;" onclick="generateTierLetters(3)">
                             Generate Letters
                         </button>
                     </div>
@@ -1995,19 +2015,17 @@ ORDER BY s.grade_level, s.last_name"></textarea>
         
         <!-- STRATEGIC KPIS PAGE -->
         <div id="strategic" class="page">
-            <div class="card">
-                <div class="card-title">5-Year Strategic Plan Dashboard</div>
-                <div class="alert info">
-                    <div class="alert-icon">📊</div>
-                    <div class="alert-content">
-                        Track KIPP St. Louis progress against 5-year strategic goals across academic, operational, and financial metrics.
-                    </div>
-                </div>
+            <div class="card" style="margin-bottom: 1rem;">
+                <div class="card-title">Strategic Plan Dashboard (2021-2026)</div>
+                <p style="color: var(--gray-600); margin-top: 0.5rem;">
+                    Progress tracking against KIPP St. Louis 5-year strategic goals. Metrics align with board-approved targets and KIPP Foundation benchmarks.
+                </p>
             </div>
-            
+
             <div class="dashboard-grid-2">
                 <div class="card">
-                    <div class="card-title">Student Achievement - % Proficient</div>
+                    <div class="card-title">Student Achievement - % Proficient on MAP</div>
+                    <p style="font-size: 0.8rem; color: var(--gray-500); margin-bottom: 0.5rem;">Missouri Assessment Program state assessments (ELA + Math combined)</p>
                     <div class="chart-container chart-container-lg">
                         <canvas id="achievementChart"></canvas>
                     </div>
@@ -2077,21 +2095,18 @@ ORDER BY s.grade_level, s.last_name"></textarea>
         
         <!-- ADVANCED ANALYTICS PAGE -->
         <div id="analytics" class="page">
-            <div class="card">
-                <div class="card-title">Predictive Analytics & Machine Learning</div>
-                <div class="alert info">
-                    <div class="alert-icon">🔬</div>
-                    <div class="alert-content">
-                        Advanced analytics using machine learning for student intervention prediction, enrollment forecasting, and risk assessment.
-                    </div>
-                </div>
+            <div class="card" style="margin-bottom: 1rem;">
+                <div class="card-title">Analytics & Predictive Modeling</div>
+                <p style="color: var(--gray-600); margin-top: 0.5rem;">Machine learning models, 3D visualizations, and data-driven insights for student intervention and strategic planning.</p>
             </div>
-            
+
             <div class="tabs">
-                <button class="tab active" onclick="switchTab('predictive-intervention', this)">Intervention Prediction</button>
+                <button class="tab active" onclick="switchTab('predictive-intervention', this)">Risk Prediction</button>
+                <button class="tab" onclick="switchTab('student-risk-3d', this)">3D Risk Space</button>
+                <button class="tab" onclick="switchTab('intervention-network', this)">Intervention Network</button>
+                <button class="tab" onclick="switchTab('cohort-flow', this)">Cohort Flow</button>
                 <button class="tab" onclick="switchTab('enrollment-forecast', this)">Enrollment Forecast</button>
-                <button class="tab" onclick="switchTab('assessment-analysis', this)">Assessment Analysis</button>
-                <button class="tab" onclick="switchTab('cohort-analysis', this)">Cohort Analysis</button>
+                <button class="tab" onclick="switchTab('geo-analysis', this)">Geographic View</button>
             </div>
             
             <div id="predictive-intervention" class="tab-content active">
@@ -2215,56 +2230,8 @@ ORDER BY s.grade_level, s.last_name"></textarea>
                 </div>
             </div>
             
-            <div id="cohort-analysis" class="tab-content">
-                <div class="card">
-                    <div class="card-title">Cohort Tracking Analysis</div>
-                    <p style="color: var(--gray-600); margin-bottom: 1rem;">
-                        Track student cohorts from 6th grade through 12th grade graduation and beyond.
-                    </p>
-                    <div class="chart-container chart-container-lg">
-                        <canvas id="cohortChart"></canvas>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-title">Class of 2025 Outcomes</div>
-                    <div class="dashboard-grid">
-                        <div style="text-align: center;">
-                            <div style="font-size: 2.5rem; font-weight: 700; color: var(--success);">96%</div>
-                            <div style="color: var(--gray-600);">College Acceptance Rate</div>
-                        </div>
-                        <div style="text-align: center;">
-                            <div style="font-size: 2.5rem; font-weight: 700; color: var(--success);">$8.2M</div>
-                            <div style="color: var(--gray-600);">Total Scholarships</div>
-                        </div>
-                        <div style="text-align: center;">
-                            <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary);">$56,300</div>
-                            <div style="color: var(--gray-600);">Avg Scholarship per Student</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 3D ANALYTICS LAB PAGE -->
-        <div id="analytics-3d" class="page">
-            <div class="alert info" style="margin-bottom: 1.5rem;">
-                <div class="alert-icon">🧊</div>
-                <div class="alert-content">
-                    <div class="alert-title">3D Analytics Lab - Research-Validated Visualizations</div>
-                    Interactive 3D visualizations for multi-dimensional data analysis. These visualizations follow research-backed principles from Cleveland & McGill, Tufte, and Munzner to reduce cognitive load while maximizing insight discovery. Use mouse to rotate, scroll to zoom.
-                </div>
-            </div>
-
-            <div class="tabs">
-                <button class="tab active" onclick="switchTab('student-risk-3d', this)">Student Risk Space</button>
-                <button class="tab" onclick="switchTab('intervention-network', this)">Intervention Network</button>
-                <button class="tab" onclick="switchTab('cohort-flow', this)">Cohort Flow</button>
-                <button class="tab" onclick="switchTab('geo-analysis', this)">Geographic Analysis</button>
-            </div>
-
             <!-- 3D Student Risk Space -->
-            <div id="student-risk-3d" class="tab-content active">
+            <div id="student-risk-3d" class="tab-content">
                 <div class="card">
                     <div class="card-header">
                         <div class="card-title">Multi-Dimensional Student Risk Analysis</div>
@@ -2585,9 +2552,9 @@ ORDER BY s.grade_level, s.last_name"></textarea>
             
             activityLog: [
                 {timestamp: '2025-11-20 08:15', user: 'System', action: 'Daily ETL completed', status: 'success'},
-                {timestamp: '2025-11-20 07:45', user: 'Louis Wagner', action: 'Ran DESE validation', status: 'success'},
+                {timestamp: '2025-11-20 07:45', user: 'Louis Rosche', action: 'Ran DESE validation', status: 'success'},
                 {timestamp: '2025-11-19 16:30', user: 'Sarah Johnson', action: 'Updated student schedule', status: 'success'},
-                {timestamp: '2025-11-19 14:20', user: 'Louis Wagner', action: 'Generated MOSIS report', status: 'success'},
+                {timestamp: '2025-11-19 14:20', user: 'Louis Rosche', action: 'Generated MOSIS report', status: 'success'},
                 {timestamp: '2025-11-19 10:15', user: 'System', action: 'Attendance sync from PowerSchool', status: 'success'}
             ],
             
@@ -3471,9 +3438,9 @@ ORDER BY s.grade_level, s.last_name"></textarea>
         function renderSubmissionHistory() {
             const table = document.getElementById('submission-history-table');
             const history = [
-                {date: '2025-07-31', type: 'End of Year MOSIS', status: 'Accepted', records: 1203, user: 'Louis Wagner'},
+                {date: '2025-07-31', type: 'End of Year MOSIS', status: 'Accepted', records: 1203, user: 'Louis Rosche'},
                 {date: '2024-12-15', type: 'Fall MOSIS', status: 'Accepted', records: 1156, user: 'Sarah Johnson'},
-                {date: '2024-07-31', type: 'End of Year MOSIS', status: 'Accepted', records: 1089, user: 'Louis Wagner'}
+                {date: '2024-07-31', type: 'End of Year MOSIS', status: 'Accepted', records: 1089, user: 'Louis Rosche'}
             ];
             table.innerHTML = `
                 <thead>
@@ -4247,9 +4214,9 @@ ORDER BY attendance_rate ASC`
 
             // Generate audit trail data
             const auditData = [
-                {timestamp: '2025-11-25 09:15:23', user: 'Louis Wagner', action: 'Updated student demographics', field: 'ethnicity', oldValue: 'Not Specified', newValue: 'African American', recordId: 'S001234'},
+                {timestamp: '2025-11-25 09:15:23', user: 'Louis Rosche', action: 'Updated student demographics', field: 'ethnicity', oldValue: 'Not Specified', newValue: 'African American', recordId: 'S001234'},
                 {timestamp: '2025-11-24 14:32:10', user: 'Sarah Johnson', action: 'Modified attendance record', field: 'attendance_code', oldValue: 'A', newValue: 'E', recordId: 'S002156'},
-                {timestamp: '2025-11-24 11:05:45', user: 'Louis Wagner', action: 'Fixed duplicate State ID', field: 'state_id', oldValue: 'MO12345678', newValue: 'MO12345679', recordId: 'S003421'},
+                {timestamp: '2025-11-24 11:05:45', user: 'Louis Rosche', action: 'Fixed duplicate State ID', field: 'state_id', oldValue: 'MO12345678', newValue: 'MO12345679', recordId: 'S003421'},
                 {timestamp: '2025-11-23 16:20:00', user: 'System', action: 'Automated data sync from PowerSchool', field: 'bulk_update', oldValue: '-', newValue: '23 records', recordId: 'BATCH'},
                 {timestamp: '2025-11-22 08:45:12', user: 'Sarah Johnson', action: 'Corrected grade level', field: 'grade_level', oldValue: '13', newValue: '12', recordId: 'S001892'}
             ];
@@ -4893,8 +4860,7 @@ ORDER BY attendance_rate ASC`
             schoolGroups.append('circle')
                 .attr('r', d => Math.sqrt(d.enrollment) * 1.5)
                 .attr('fill', d => colorScale(d.performance))
-                .attr('fill-opacity', 0.3)
-                .attr('class', 'pulse-ring');
+                .attr('fill-opacity', 0.2);
 
             schoolGroups.append('circle')
                 .attr('r', d => Math.sqrt(d.enrollment))
@@ -4958,17 +4924,6 @@ ORDER BY attendance_rate ASC`
                     .text(item.label);
             });
 
-            // Add CSS animation for pulsing
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes pulse {
-                    0% { transform: scale(1); opacity: 0.3; }
-                    50% { transform: scale(1.3); opacity: 0.1; }
-                    100% { transform: scale(1); opacity: 0.3; }
-                }
-                .pulse-ring { animation: pulse 2s ease-in-out infinite; transform-origin: center; }
-            `;
-            document.head.appendChild(style);
         }
 
         function updateGeoMap() {
@@ -5002,7 +4957,7 @@ ORDER BY attendance_rate ASC`
         const originalSwitchPage = switchPage;
         switchPage = function(pageId) {
             originalSwitchPage(pageId);
-            if (pageId === 'analytics-3d') {
+            if (pageId === 'analytics') {
                 setTimeout(init3DVisualizations, 100);
             }
         };
@@ -5010,8 +4965,8 @@ ORDER BY attendance_rate ASC`
         // Initialize on page load
         window.addEventListener('DOMContentLoaded', function() {
             init();
-            // Pre-initialize 3D if starting on that page
-            if (document.getElementById('analytics-3d')?.classList.contains('active')) {
+            // Pre-initialize 3D if starting on analytics page
+            if (document.getElementById('analytics')?.classList.contains('active')) {
                 init3DVisualizations();
             }
         });
