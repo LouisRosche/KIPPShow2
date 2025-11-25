@@ -1019,23 +1019,27 @@
         <div class="header-content">
             <div>
                 <h1>KIPP St. Louis - Data & Compliance Command Center</h1>
-                <div class="subtitle">Integrated Student Information Systems • DESE Compliance • Strategic Analytics</div>
+                <div class="subtitle">Portfolio Demonstration • All Data is Simulated • Built by Louis Rosche</div>
             </div>
             <div class="header-stats">
                 <div class="header-stat">
                     <div class="header-stat-value" id="header-students">1,247</div>
-                    <div class="header-stat-label">Active Students</div>
+                    <div class="header-stat-label">Sample Students</div>
                 </div>
                 <div class="header-stat">
                     <div class="header-stat-value good" id="header-accuracy">97.3%</div>
-                    <div class="header-stat-label">Data Accuracy</div>
+                    <div class="header-stat-label">Demo Metric</div>
                 </div>
                 <div class="header-stat">
-                    <div class="header-stat-value" id="header-sync">—</div>
-                    <div class="header-stat-label">Last Sync</div>
+                    <div class="header-stat-value" id="header-sync">Demo</div>
+                    <div class="header-stat-label">Mode</div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-bottom: 2px solid #f59e0b; padding: 0.5rem 1rem; text-align: center; font-size: 0.85rem;">
+        <strong>Portfolio Project:</strong> This dashboard demonstrates technical capabilities using simulated data. All student names, statistics, and records are fictional samples—not real student information.
     </div>
     
     <div class="nav">
@@ -2241,7 +2245,7 @@ ORDER BY s.grade_level, s.last_name"></textarea>
                         </div>
                     </div>
                     <p style="color: var(--gray-600); margin-bottom: 1rem;">
-                        Each point represents a student plotted across three key dimensions. Clusters reveal patterns invisible in traditional 2D charts. <strong>Research basis:</strong> 3D scatter plots are validated for genuine multi-dimensional data where spatial relationships matter (Sedlmair et al., 2013).
+                        Each student is plotted across three dimensions: academic performance, attendance rate, and engagement score. <strong>Note:</strong> Research by Sedlmair et al. (2013) suggests 2D plots often suffice; this 3D view is primarily for demonstration of interactive visualization capabilities.
                     </p>
                     <div id="risk-3d-plot" class="viz-3d-container tall" role="img" aria-label="3D scatter plot showing students plotted by academic performance, attendance rate, and engagement score. High-risk students cluster in the lower-left-front region.">
                         <span class="sr-only">Interactive 3D visualization. Use mouse to rotate view, scroll to zoom. High-risk students shown in red, medium risk in yellow, low risk in green.</span>
@@ -2552,9 +2556,9 @@ ORDER BY s.grade_level, s.last_name"></textarea>
             
             activityLog: [
                 {timestamp: '2025-11-20 08:15', user: 'System', action: 'Daily ETL completed', status: 'success'},
-                {timestamp: '2025-11-20 07:45', user: 'Louis Rosche', action: 'Ran DESE validation', status: 'success'},
-                {timestamp: '2025-11-19 16:30', user: 'Sarah Johnson', action: 'Updated student schedule', status: 'success'},
-                {timestamp: '2025-11-19 14:20', user: 'Louis Rosche', action: 'Generated MOSIS report', status: 'success'},
+                {timestamp: '2025-11-20 07:45', user: 'Data Analyst', action: 'Ran DESE validation', status: 'success'},
+                {timestamp: '2025-11-19 16:30', user: 'Registrar', action: 'Updated student schedule', status: 'success'},
+                {timestamp: '2025-11-19 14:20', user: 'Data Analyst', action: 'Generated MOSIS report', status: 'success'},
                 {timestamp: '2025-11-19 10:15', user: 'System', action: 'Attendance sync from PowerSchool', status: 'success'}
             ],
             
@@ -3437,10 +3441,11 @@ ORDER BY s.grade_level, s.last_name"></textarea>
         
         function renderSubmissionHistory() {
             const table = document.getElementById('submission-history-table');
+            // Sample submission history for demonstration
             const history = [
-                {date: '2025-07-31', type: 'End of Year MOSIS', status: 'Accepted', records: 1203, user: 'Louis Rosche'},
-                {date: '2024-12-15', type: 'Fall MOSIS', status: 'Accepted', records: 1156, user: 'Sarah Johnson'},
-                {date: '2024-07-31', type: 'End of Year MOSIS', status: 'Accepted', records: 1089, user: 'Louis Rosche'}
+                {date: '(Sample) July 2025', type: 'End of Year MOSIS', status: 'Accepted', records: 1203, user: 'Data Team'},
+                {date: '(Sample) Dec 2024', type: 'Fall MOSIS', status: 'Accepted', records: 1156, user: 'Data Team'},
+                {date: '(Sample) July 2024', type: 'End of Year MOSIS', status: 'Accepted', records: 1089, user: 'Data Team'}
             ];
             table.innerHTML = `
                 <thead>
@@ -4212,13 +4217,13 @@ ORDER BY attendance_rate ASC`
             const startDate = document.getElementById('audit-start-date')?.value;
             const endDate = document.getElementById('audit-end-date')?.value;
 
-            // Generate audit trail data
+            // Generate sample audit trail data
             const auditData = [
-                {timestamp: '2025-11-25 09:15:23', user: 'Louis Rosche', action: 'Updated student demographics', field: 'ethnicity', oldValue: 'Not Specified', newValue: 'African American', recordId: 'S001234'},
-                {timestamp: '2025-11-24 14:32:10', user: 'Sarah Johnson', action: 'Modified attendance record', field: 'attendance_code', oldValue: 'A', newValue: 'E', recordId: 'S002156'},
-                {timestamp: '2025-11-24 11:05:45', user: 'Louis Rosche', action: 'Fixed duplicate State ID', field: 'state_id', oldValue: 'MO12345678', newValue: 'MO12345679', recordId: 'S003421'},
+                {timestamp: '2025-11-25 09:15:23', user: 'Data Analyst', action: 'Updated student demographics', field: 'ethnicity', oldValue: 'Not Specified', newValue: 'African American', recordId: 'SAMPLE-001'},
+                {timestamp: '2025-11-24 14:32:10', user: 'Registrar', action: 'Modified attendance record', field: 'attendance_code', oldValue: 'A', newValue: 'E', recordId: 'SAMPLE-002'},
+                {timestamp: '2025-11-24 11:05:45', user: 'Data Analyst', action: 'Fixed duplicate State ID', field: 'state_id', oldValue: 'MO-SAMPLE-1', newValue: 'MO-SAMPLE-2', recordId: 'SAMPLE-003'},
                 {timestamp: '2025-11-23 16:20:00', user: 'System', action: 'Automated data sync from PowerSchool', field: 'bulk_update', oldValue: '-', newValue: '23 records', recordId: 'BATCH'},
-                {timestamp: '2025-11-22 08:45:12', user: 'Sarah Johnson', action: 'Corrected grade level', field: 'grade_level', oldValue: '13', newValue: '12', recordId: 'S001892'}
+                {timestamp: '2025-11-22 08:45:12', user: 'Registrar', action: 'Corrected grade level', field: 'grade_level', oldValue: '13', newValue: '12', recordId: 'SAMPLE-004'}
             ];
 
             const table = document.getElementById('audit-trail-table');
