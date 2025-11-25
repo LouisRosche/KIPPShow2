@@ -1040,16 +1040,28 @@
                         <span class="status-badge complete">● Online</span>
                     </div>
                     <div class="metric">
-                        <span class="metric-label">MOSIS Connection</span>
-                        <span class="status-badge complete">● Connected</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">Data Warehouse</span>
+                        <span class="metric-label">SchoolMint Grow</span>
                         <span class="status-badge complete">● Synced</span>
                     </div>
                     <div class="metric">
+                        <span class="metric-label">Illuminate DnA</span>
+                        <span class="status-badge complete">● Connected</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Schoolytics</span>
+                        <span class="status-badge complete">● Active</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">DeansList</span>
+                        <span class="status-badge complete">● Online</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">MOSIS/DRC Portal</span>
+                        <span class="status-badge complete">● Connected</span>
+                    </div>
+                    <div class="metric">
                         <span class="metric-label">Last ETL Run</span>
-                        <span class="metric-value" style="font-size: 0.9rem;">3:00 AM</span>
+                        <span class="metric-value" style="font-size: 0.9rem;" id="last-sync">3:00 AM</span>
                     </div>
                 </div>
             </div>
@@ -2370,25 +2382,66 @@ ORDER BY s.grade_level, s.last_name"></textarea>
                     'Other': 10
                 },
                 truancyQueue: [
+                    // Tier 3 (10+ absences) - 5 students
                     {id: 'S001234', name: 'Anderson, James', grade: 7, absences: 12, rate: 81.2, tier: 3, lastContact: '2025-11-10', riskScore: 0.89},
                     {id: 'S001567', name: 'Brown, Sarah', grade: 8, absences: 10, rate: 85.3, tier: 3, lastContact: '2025-11-12', riskScore: 0.76},
+                    {id: 'S003421', name: 'Evans, Marcus', grade: 10, absences: 11, rate: 83.1, tier: 3, lastContact: '2025-11-08', riskScore: 0.82},
+                    {id: 'S004102', name: 'Foster, Aaliyah', grade: 6, absences: 14, rate: 78.5, tier: 3, lastContact: '2025-11-05', riskScore: 0.91},
+                    {id: 'S004455', name: 'Green, Darius', grade: 9, absences: 10, rate: 84.6, tier: 3, lastContact: '2025-11-11', riskScore: 0.78},
+                    // Tier 2 (7-9 absences) - 10 students
                     {id: 'S002145', name: 'Carter, Michael', grade: 9, absences: 8, rate: 88.7, tier: 2, lastContact: '2025-11-15', riskScore: 0.64},
                     {id: 'S002890', name: 'Davis, Emily', grade: 7, absences: 7, rate: 89.5, tier: 2, lastContact: '2025-11-16', riskScore: 0.58},
-                    {id: 'S003421', name: 'Evans, Marcus', grade: 10, absences: 11, rate: 83.1, tier: 3, lastContact: '2025-11-08', riskScore: 0.82}
+                    {id: 'S005012', name: 'Harris, Jordan', grade: 8, absences: 9, rate: 86.2, tier: 2, lastContact: '2025-11-14', riskScore: 0.67},
+                    {id: 'S005234', name: 'Irving, Maya', grade: 6, absences: 8, rate: 87.7, tier: 2, lastContact: '2025-11-17', riskScore: 0.61},
+                    {id: 'S005567', name: 'Jackson, Terrell', grade: 11, absences: 7, rate: 89.2, tier: 2, lastContact: '2025-11-18', riskScore: 0.55},
+                    {id: 'S005890', name: 'King, Brianna', grade: 7, absences: 9, rate: 86.5, tier: 2, lastContact: '2025-11-13', riskScore: 0.69},
+                    {id: 'S006123', name: 'Lewis, Andre', grade: 10, absences: 8, rate: 87.4, tier: 2, lastContact: '2025-11-16', riskScore: 0.62},
+                    {id: 'S006456', name: 'Mitchell, Jasmine', grade: 8, absences: 7, rate: 89.1, tier: 2, lastContact: '2025-11-19', riskScore: 0.54},
+                    {id: 'S006789', name: 'Nelson, Chris', grade: 9, absences: 9, rate: 86.8, tier: 2, lastContact: '2025-11-12', riskScore: 0.68},
+                    {id: 'S007012', name: 'Owens, Destiny', grade: 6, absences: 8, rate: 87.9, tier: 2, lastContact: '2025-11-15', riskScore: 0.59},
+                    // Tier 1 (5-6 absences) - 8 students
+                    {id: 'S007345', name: 'Parker, Isaiah', grade: 7, absences: 6, rate: 90.8, tier: 1, lastContact: '2025-11-18', riskScore: 0.45},
+                    {id: 'S007678', name: 'Quinn, Alexis', grade: 8, absences: 5, rate: 92.3, tier: 1, lastContact: '2025-11-19', riskScore: 0.38},
+                    {id: 'S007901', name: 'Robinson, Malik', grade: 10, absences: 6, rate: 90.5, tier: 1, lastContact: '2025-11-17', riskScore: 0.47},
+                    {id: 'S008234', name: 'Smith, Kayla', grade: 6, absences: 5, rate: 92.1, tier: 1, lastContact: '2025-11-20', riskScore: 0.36},
+                    {id: 'S008567', name: 'Taylor, Devon', grade: 9, absences: 6, rate: 90.9, tier: 1, lastContact: '2025-11-16', riskScore: 0.44},
+                    {id: 'S008890', name: 'Underwood, Zoe', grade: 11, absences: 5, rate: 92.4, tier: 1, lastContact: '2025-11-19', riskScore: 0.35},
+                    {id: 'S009123', name: 'Vance, Marcus', grade: 7, absences: 6, rate: 90.6, tier: 1, lastContact: '2025-11-18', riskScore: 0.46},
+                    {id: 'S009456', name: 'Washington, Nia', grade: 8, absences: 5, rate: 92.0, tier: 1, lastContact: '2025-11-20', riskScore: 0.39}
                 ]
             },
             
-            compliance: [
-                {task: 'MOSIS Fall Submission', owner: 'Data Team', deadline: '2025-12-15', status: 'In Progress', category: 'State Reporting', daysUntil: 25, priority: 'high'},
-                {task: 'Title I Annual Report', owner: 'Academic Team', deadline: '2025-12-01', status: 'In Progress', category: 'Federal Compliance', daysUntil: 11, priority: 'high'},
-                {task: 'Special Ed Child Count', owner: 'SPED Team', deadline: '2025-12-08', status: 'Complete', category: 'State Reporting', daysUntil: 18, priority: 'high'},
-                {task: 'ESSER Quarterly Report', owner: 'Finance Team', deadline: '2025-11-30', status: 'Overdue', category: 'Federal Compliance', daysUntil: -10, priority: 'critical'},
-                {task: 'Attendance Audit', owner: 'Operations', deadline: '2025-11-25', status: 'Overdue', category: 'State Compliance', daysUntil: -5, priority: 'high'},
-                {task: 'Staff Certification Verification', owner: 'HR Team', deadline: '2025-12-10', status: 'In Progress', category: 'State Compliance', daysUntil: 20, priority: 'medium'},
-                {task: 'Free/Reduced Lunch Recert', owner: 'Operations', deadline: '2025-12-20', status: 'Not Started', category: 'Federal Compliance', daysUntil: 30, priority: 'medium'},
-                {task: 'School Safety Audit', owner: 'Operations', deadline: '2025-12-05', status: 'In Progress', category: 'State Compliance', daysUntil: 15, priority: 'high'},
-                {task: 'ELL Assessment Window', owner: 'Academic Team', deadline: '2025-12-22', status: 'Not Started', category: 'State Compliance', daysUntil: 32, priority: 'medium'}
-            ],
+            compliance: (function() {
+                // Dynamic date calculation - deadlines are set relative to demo date
+                const baseDate = new Date();
+                const items = [
+                    {task: 'MOSIS Fall Submission', owner: 'Data Team', deadline: 20, status: 'In Progress', category: 'State Reporting', priority: 'high'},
+                    {task: 'Title I Annual Report', owner: 'Academic Team', deadline: 6, status: 'In Progress', category: 'Federal Compliance', priority: 'high'},
+                    {task: 'Special Ed Child Count', owner: 'SPED Team', deadline: 13, status: 'Complete', category: 'State Reporting', priority: 'high'},
+                    {task: 'ESSER Quarterly Report', owner: 'Finance Team', deadline: -5, status: 'Overdue', category: 'Federal Compliance', priority: 'critical'},
+                    {task: 'Attendance Audit', owner: 'Operations', deadline: -2, status: 'Overdue', category: 'State Compliance', priority: 'high'},
+                    {task: 'Staff Certification Verification', owner: 'HR Team', deadline: 15, status: 'In Progress', category: 'State Compliance', priority: 'medium'},
+                    {task: 'Free/Reduced Lunch Recert', owner: 'Operations', deadline: 25, status: 'Not Started', category: 'Federal Compliance', priority: 'medium'},
+                    {task: 'School Safety Audit', owner: 'Operations', deadline: 10, status: 'In Progress', category: 'State Compliance', priority: 'high'},
+                    {task: 'ELL Assessment Window', owner: 'Academic Team', deadline: 27, status: 'Not Started', category: 'State Compliance', priority: 'medium'},
+                    {task: 'SchoolMint Grow Sync', owner: 'Data Team', deadline: 3, status: 'In Progress', category: 'Data Systems', priority: 'medium'},
+                    {task: 'Illuminate Assessment Upload', owner: 'Academic Team', deadline: 8, status: 'Not Started', category: 'Data Systems', priority: 'high'},
+                    {task: 'DRC State Assessment Prep', owner: 'Academic Team', deadline: 45, status: 'Not Started', category: 'State Reporting', priority: 'medium'}
+                ];
+                return items.map(item => {
+                    const deadlineDate = new Date(baseDate);
+                    deadlineDate.setDate(deadlineDate.getDate() + item.deadline);
+                    return {
+                        task: item.task,
+                        owner: item.owner,
+                        deadline: deadlineDate.toISOString().split('T')[0],
+                        status: item.status,
+                        category: item.category,
+                        daysUntil: item.deadline,
+                        priority: item.priority
+                    };
+                });
+            })(),
             
             validation: {
                 totalRecords: 1247,
@@ -2463,11 +2516,86 @@ ORDER BY s.grade_level, s.last_name"></textarea>
         let savedQueries = [];
         
         // ========== INITIALIZATION ==========
+        // SQL Database and results storage
+        let sqlDB = null;
+        let lastSQLResults = [];
+
+        async function initSQLDatabase() {
+            try {
+                const SQL = await initSqlJs({
+                    locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+                });
+                sqlDB = new SQL.Database();
+
+                // Create tables matching PowerSchool schema
+                sqlDB.run(`
+                    CREATE TABLE students (
+                        id INTEGER PRIMARY KEY,
+                        student_number TEXT,
+                        first_name TEXT,
+                        last_name TEXT,
+                        grade_level INTEGER,
+                        dob TEXT,
+                        ethnicity TEXT,
+                        gender TEXT,
+                        guardianEmail TEXT,
+                        home_phone TEXT,
+                        enroll_status INTEGER DEFAULT 0,
+                        school_id INTEGER DEFAULT 1
+                    );
+                    CREATE TABLE attendance (
+                        id INTEGER PRIMARY KEY,
+                        studentid INTEGER,
+                        att_date TEXT,
+                        attendance_codeid INTEGER,
+                        FOREIGN KEY(studentid) REFERENCES students(id)
+                    );
+                    CREATE TABLE courses (
+                        id INTEGER PRIMARY KEY,
+                        course_number TEXT,
+                        course_name TEXT,
+                        department TEXT,
+                        credit_hours REAL
+                    );
+                `);
+
+                // Populate with data from DATA model
+                const ethnicities = Object.keys(DATA.students.demographics);
+                DATA.attendance.truancyQueue.forEach((s, idx) => {
+                    const nameParts = s.name.split(', ');
+                    sqlDB.run(`INSERT INTO students VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                        [idx + 1, s.id, nameParts[1] || '', nameParts[0] || '', s.grade, '2010-01-01',
+                         ethnicities[idx % ethnicities.length], idx % 2 === 0 ? 'M' : 'F',
+                         `parent${idx}@email.com`, '314-555-' + String(1000 + idx), 0, 1]);
+
+                    // Add attendance records
+                    for (let d = 0; d < 30; d++) {
+                        const date = new Date();
+                        date.setDate(date.getDate() - d);
+                        const isPresent = Math.random() > (1 - s.rate / 100);
+                        sqlDB.run(`INSERT INTO attendance (studentid, att_date, attendance_codeid) VALUES (?, ?, ?)`,
+                            [idx + 1, date.toISOString().split('T')[0], isPresent ? 1 : 2]);
+                    }
+                });
+
+                // Add courses
+                DATA.courses.forEach((c, idx) => {
+                    sqlDB.run(`INSERT INTO courses VALUES (?, ?, ?, ?, ?)`,
+                        [idx + 1, c.code, c.name, c.dept, c.credits]);
+                });
+
+                console.log('SQL Database initialized with sample data');
+            } catch (e) {
+                console.warn('SQL.js initialization failed, using mock mode:', e);
+            }
+        }
+
         function init() {
             updateLastSync();
             generateAlerts();
             initializeAllCharts();
             renderAllTables();
+            initSQLDatabase();
             setInterval(updateLastSync, 60000);
         }
         
@@ -3493,24 +3621,89 @@ ${sampleData}</div>
                 alert('Please enter a SQL query');
                 return;
             }
-            
-            // Simulate query execution
-            const mockResults = [
-                {student_number: 'S001234', first_name: 'James', last_name: 'Anderson', grade_level: 7, ethnicity: 'African American'},
-                {student_number: 'S001567', first_name: 'Sarah', last_name: 'Brown', grade_level: 8, ethnicity: 'Hispanic/Latino'},
-                {student_number: 'S002145', first_name: 'Michael', last_name: 'Carter', grade_level: 9, ethnicity: 'African American'},
-                {student_number: 'S002890', first_name: 'Emily', last_name: 'Davis', grade_level: 7, ethnicity: 'White'},
-                {student_number: 'S003421', first_name: 'Marcus', last_name: 'Evans', grade_level: 10, ethnicity: 'African American'}
-            ];
-            
+
             const container = document.getElementById('sql-results-container');
             const exportSection = document.getElementById('sql-export-section');
-            
-            if (mockResults.length > 0) {
+
+            // Try to execute with real SQL.js database
+            if (sqlDB) {
+                try {
+                    const startTime = performance.now();
+                    const results = sqlDB.exec(query);
+                    const endTime = performance.now();
+                    const execTime = (endTime - startTime).toFixed(2);
+
+                    if (results.length > 0 && results[0].values.length > 0) {
+                        const columns = results[0].columns;
+                        const rows = results[0].values;
+
+                        // Convert to objects for export
+                        lastSQLResults = rows.map(row => {
+                            const obj = {};
+                            columns.forEach((col, idx) => obj[col] = row[idx]);
+                            return obj;
+                        });
+
+                        container.innerHTML = `
+                            <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--success);">
+                                ✓ Query executed successfully - ${rows.length} rows returned (${execTime}ms)
+                            </div>
+                            <div style="overflow-x: auto;">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>${columns.map(h => `<th>${h}</th>`).join('')}</tr>
+                                    </thead>
+                                    <tbody>
+                                        ${rows.slice(0, 100).map(row => `
+                                            <tr>${row.map(cell => `<td>${cell !== null ? cell : 'NULL'}</td>`).join('')}</tr>
+                                        `).join('')}
+                                        ${rows.length > 100 ? `<tr><td colspan="${columns.length}" style="text-align: center; font-style: italic;">... and ${rows.length - 100} more rows (showing first 100)</td></tr>` : ''}
+                                    </tbody>
+                                </table>
+                            </div>
+                        `;
+                        exportSection.style.display = 'flex';
+                    } else {
+                        // Query executed but returned no results (e.g., INSERT, UPDATE)
+                        lastSQLResults = [];
+                        container.innerHTML = `
+                            <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--success);">
+                                ✓ Query executed successfully (${execTime}ms)
+                            </div>
+                            <div style="color: var(--gray-600);">Query returned no results or was a modification statement.</div>
+                        `;
+                        exportSection.style.display = 'none';
+                    }
+                } catch (e) {
+                    lastSQLResults = [];
+                    container.innerHTML = `
+                        <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--danger);">
+                            ✗ SQL Error
+                        </div>
+                        <div style="color: var(--danger); font-family: monospace; padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: 6px;">
+                            ${e.message}
+                        </div>
+                        <div style="margin-top: 1rem; color: var(--gray-600); font-size: 0.9rem;">
+                            <strong>Available tables:</strong> students, attendance, courses<br>
+                            <strong>Tip:</strong> Try <code>SELECT * FROM students LIMIT 10</code>
+                        </div>
+                    `;
+                    exportSection.style.display = 'none';
+                }
+            } else {
+                // Fallback mock mode if SQL.js didn't load
+                const mockResults = DATA.attendance.truancyQueue.slice(0, 5).map(s => ({
+                    student_number: s.id,
+                    first_name: s.name.split(', ')[1],
+                    last_name: s.name.split(', ')[0],
+                    grade_level: s.grade,
+                    attendance_rate: s.rate
+                }));
+                lastSQLResults = mockResults;
                 const headers = Object.keys(mockResults[0]);
                 container.innerHTML = `
-                    <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--success);">
-                        ✓ Query executed successfully - ${mockResults.length} rows returned
+                    <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--warning);">
+                        ⚠ Running in mock mode (SQL.js not loaded) - Showing sample data
                     </div>
                     <div style="overflow-x: auto;">
                         <table class="data-table">
@@ -3530,58 +3723,64 @@ ${sampleData}</div>
         }
         
         function loadQueryTemplate(template) {
+            // Templates that work with actual sql.js database
             const templates = {
-                'student-roster': `SELECT 
-    s.student_number,
-    s.first_name,
-    s.last_name,
-    s.grade_level,
-    s.dob,
-    s.ethnicity
-FROM students s
-WHERE s.enroll_status = 0
-ORDER BY s.grade_level, s.last_name`,
-                'attendance-summary': `SELECT 
+                'student-roster': `SELECT
+    student_number,
+    first_name,
+    last_name,
+    grade_level,
+    dob,
+    ethnicity
+FROM students
+WHERE enroll_status = 0
+ORDER BY grade_level, last_name`,
+                'attendance-summary': `SELECT
     s.student_number,
     s.first_name || ' ' || s.last_name AS student_name,
-    COUNT(CASE WHEN a.attendance_codeid = 1 THEN 1 END) AS present,
-    COUNT(CASE WHEN a.attendance_codeid != 1 THEN 1 END) AS absent,
+    s.grade_level,
+    COUNT(CASE WHEN a.attendance_codeid = 1 THEN 1 END) AS days_present,
+    COUNT(CASE WHEN a.attendance_codeid != 1 THEN 1 END) AS days_absent,
     ROUND(COUNT(CASE WHEN a.attendance_codeid = 1 THEN 1 END) * 100.0 / COUNT(*), 1) AS attendance_rate
 FROM students s
-JOIN attendance a ON s.id = a.studentid
-WHERE a.att_date >= DATE('now', '-30 days')
+LEFT JOIN attendance a ON s.id = a.studentid
 GROUP BY s.id
-ORDER BY attendance_rate`,
-                'grade-distribution': `SELECT 
-    sg.grade,
-    COUNT(*) AS count
-FROM storedgrades sg
-WHERE sg.storecode = 'Q1'
-AND sg.schoolid = 1
-GROUP BY sg.grade
-ORDER BY sg.grade`,
-                'schedule-conflicts': `SELECT 
-    s.student_number,
-    s.first_name || ' ' || s.last_name AS student_name,
-    COUNT(*) AS course_count,
-    GROUP_CONCAT(c.course_name) AS courses
-FROM students s
-JOIN cc ON s.id = cc.studentid
-JOIN courses c ON cc.course_number = c.course_number
-WHERE cc.termid = (SELECT id FROM terms WHERE year_id = 2025)
-GROUP BY s.id, cc.expression
-HAVING COUNT(*) > 1`,
-                'missing-data': `SELECT 
-    'Missing Email' AS issue,
-    COUNT(*) AS count
+ORDER BY attendance_rate ASC`,
+                'grade-distribution': `SELECT
+    grade_level,
+    COUNT(*) AS student_count,
+    COUNT(*) * 100.0 / (SELECT COUNT(*) FROM students) AS percentage
+FROM students
+GROUP BY grade_level
+ORDER BY grade_level`,
+                'course-catalog': `SELECT
+    course_number,
+    course_name,
+    department,
+    credit_hours
+FROM courses
+ORDER BY department, course_name`,
+                'missing-data': `SELECT
+    'Missing/Empty Email' AS issue_type,
+    COUNT(*) AS affected_count
 FROM students
 WHERE guardianEmail IS NULL OR guardianEmail = ''
 UNION ALL
-SELECT 
-    'Missing Phone',
+SELECT
+    'Missing/Empty Phone',
     COUNT(*)
 FROM students
-WHERE home_phone IS NULL OR home_phone = ''`
+WHERE home_phone IS NULL OR home_phone = ''`,
+                'at-risk-students': `SELECT
+    s.student_number,
+    s.first_name || ' ' || s.last_name AS student_name,
+    s.grade_level,
+    ROUND(COUNT(CASE WHEN a.attendance_codeid = 1 THEN 1 END) * 100.0 / COUNT(*), 1) AS attendance_rate
+FROM students s
+LEFT JOIN attendance a ON s.id = a.studentid
+GROUP BY s.id
+HAVING attendance_rate < 90
+ORDER BY attendance_rate ASC`
             };
             
             const input = document.getElementById('sql-query-input');
@@ -3591,68 +3790,240 @@ WHERE home_phone IS NULL OR home_phone = ''`
         }
         
         function exportSQLResults() {
-            alert('SQL query results would be exported to Excel file');
+            if (!lastSQLResults || lastSQLResults.length === 0) {
+                alert('No SQL results to export. Please run a query first.');
+                return;
+            }
+            const ws = XLSX.utils.json_to_sheet(lastSQLResults);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Query Results');
+            XLSX.writeFile(wb, `sql_query_results_${new Date().toISOString().split('T')[0]}.xlsx`);
         }
-        
+
         function generateTruancyLetters() {
-            alert(`Generating ${DATA.attendance.truancyQueue.length} truancy intervention letters...\n\n` +
-                  `Tier 1: ${DATA.attendance.truancyQueue.filter(t => t.tier === 1).length} letters\n` +
-                  `Tier 2: ${DATA.attendance.truancyQueue.filter(t => t.tier === 2).length} letters\n` +
-                  `Tier 3: ${DATA.attendance.truancyQueue.filter(t => t.tier === 3).length} letters\n\n` +
-                  'Letters formatted per Missouri RSMO 167.031 requirements.\n' +
-                  'Ready for mail merge and parent/guardian notification.');
+            const letters = DATA.attendance.truancyQueue.map(student => ({
+                'Student ID': student.id,
+                'Student Name': student.name,
+                'Grade': student.grade,
+                'Total Absences': student.absences,
+                'Attendance Rate': student.rate + '%',
+                'Intervention Tier': student.tier,
+                'Last Contact Date': student.lastContact,
+                'Letter Type': `Tier ${student.tier} - Missouri RSMO 167.031`,
+                'Generated Date': new Date().toISOString().split('T')[0]
+            }));
+            const ws = XLSX.utils.json_to_sheet(letters);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Truancy Letters');
+            XLSX.writeFile(wb, `truancy_letters_${new Date().toISOString().split('T')[0]}.xlsx`);
+            alert(`Generated ${letters.length} truancy intervention letters.\nTier 1: ${DATA.attendance.truancyQueue.filter(t => t.tier === 1).length}\nTier 2: ${DATA.attendance.truancyQueue.filter(t => t.tier === 2).length}\nTier 3: ${DATA.attendance.truancyQueue.filter(t => t.tier === 3).length}\n\nFile downloaded: truancy_letters_${new Date().toISOString().split('T')[0]}.xlsx`);
         }
-        
+
         function generateAllTruancyLetters() {
             generateTruancyLetters();
         }
-        
+
         function generateTierLetters(tier) {
-            const count = DATA.attendance.truancyQueue.filter(t => t.tier === tier).length;
-            alert(`Generating ${count} Tier ${tier} truancy letters...\n\n` +
-                  'Letters include:\n' +
-                  '• Student attendance data\n' +
-                  '• Intervention requirements\n' +
-                  '• Parent/guardian responsibilities\n' +
-                  '• Contact information for support\n\n' +
-                  'Ready for review and mailing.');
+            const students = DATA.attendance.truancyQueue.filter(t => t.tier === tier);
+            const letters = students.map(student => ({
+                'Student ID': student.id,
+                'Student Name': student.name,
+                'Grade': student.grade,
+                'Total Absences': student.absences,
+                'Attendance Rate': student.rate + '%',
+                'Intervention Tier': tier,
+                'Last Contact Date': student.lastContact,
+                'Letter Type': `Tier ${tier} - Missouri RSMO 167.031`,
+                'Generated Date': new Date().toISOString().split('T')[0]
+            }));
+            const ws = XLSX.utils.json_to_sheet(letters);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, `Tier ${tier} Letters`);
+            XLSX.writeFile(wb, `truancy_tier${tier}_letters_${new Date().toISOString().split('T')[0]}.xlsx`);
         }
-        
+
         function exportTruancyData() {
-            alert('Truancy intervention data exported to Excel');
+            const data = DATA.attendance.truancyQueue.map(s => ({
+                'Student ID': s.id,
+                'Name': s.name,
+                'Grade': s.grade,
+                'Absences': s.absences,
+                'Attendance Rate': s.rate + '%',
+                'Tier': s.tier,
+                'Last Contact': s.lastContact,
+                'Risk Score': s.riskScore
+            }));
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Truancy Data');
+            XLSX.writeFile(wb, `truancy_intervention_data_${new Date().toISOString().split('T')[0]}.xlsx`);
         }
-        
+
         function exportChronicAbsence() {
-            alert('Chronic absence data exported to Excel');
+            const chronicStudents = DATA.attendance.truancyQueue.filter(s => s.absences >= 10);
+            const data = chronicStudents.map(s => ({
+                'Student ID': s.id,
+                'Name': s.name,
+                'Grade': s.grade,
+                'Total Absences': s.absences,
+                'Attendance Rate': s.rate + '%',
+                'Status': 'Chronically Absent (10%+ of school days)',
+                'Risk Score': s.riskScore,
+                'Last Intervention': s.lastContact
+            }));
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Chronic Absence');
+            XLSX.writeFile(wb, `chronic_absence_report_${new Date().toISOString().split('T')[0]}.xlsx`);
         }
-        
+
         function exportAttendanceReport() {
-            alert('Attendance report exported to Excel');
+            const gradeData = Object.entries(DATA.students.byGrade).map(([grade, count]) => ({
+                'Grade Level': grade,
+                'Total Students': count,
+                'Chronic Absence Count': DATA.attendance.chronicAbsence[grade] || 0,
+                'Chronic Absence Rate': ((DATA.attendance.chronicAbsence[grade] || 0) / count * 100).toFixed(1) + '%'
+            }));
+            const summaryData = [{
+                'Metric': 'Average Daily Attendance',
+                'Value': (DATA.attendance.daily.reduce((a, b) => a + b) / DATA.attendance.daily.length).toFixed(1) + '%'
+            }, {
+                'Metric': 'Total Chronically Absent',
+                'Value': Object.values(DATA.attendance.chronicAbsence).reduce((a, b) => a + b, 0)
+            }, {
+                'Metric': 'Total Students',
+                'Value': DATA.students.total
+            }];
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summaryData), 'Summary');
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(gradeData), 'By Grade');
+            XLSX.writeFile(wb, `attendance_report_${new Date().toISOString().split('T')[0]}.xlsx`);
         }
-        
+
         function exportComplianceReport() {
-            alert('Compliance tracker exported to Excel');
+            const data = DATA.compliance.map(c => ({
+                'Task': c.task,
+                'Owner': c.owner,
+                'Deadline': c.deadline,
+                'Status': c.status,
+                'Category': c.category,
+                'Days Until Due': c.daysUntil,
+                'Priority': c.priority
+            }));
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Compliance Tracker');
+            XLSX.writeFile(wb, `compliance_tracker_${new Date().toISOString().split('T')[0]}.xlsx`);
         }
-        
+
         function exportValidationReport() {
-            alert('Data validation report exported to Excel');
+            const issueData = DATA.validation.issues.map(i => ({
+                'Issue Type': i.type,
+                'Count': i.count,
+                'Severity': i.severity.toUpperCase(),
+                'Affected Area': i.affected,
+                'Category': i.category
+            }));
+            const summaryData = [{
+                'Metric': 'Total Records',
+                'Value': DATA.validation.totalRecords
+            }, {
+                'Metric': 'Valid Records',
+                'Value': DATA.validation.validRecords
+            }, {
+                'Metric': 'Data Accuracy',
+                'Value': (DATA.validation.validRecords / DATA.validation.totalRecords * 100).toFixed(1) + '%'
+            }, {
+                'Metric': 'Records with Issues',
+                'Value': DATA.validation.totalRecords - DATA.validation.validRecords
+            }];
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summaryData), 'Summary');
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(issueData), 'Issues Detail');
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(DATA.validation.duplicates), 'Duplicates');
+            XLSX.writeFile(wb, `data_validation_report_${new Date().toISOString().split('T')[0]}.xlsx`);
         }
-        
+
         function exportDashboard() {
-            alert('Dashboard snapshot exported to PDF');
+            // Create comprehensive dashboard export
+            const wb = XLSX.utils.book_new();
+            // KPIs
+            const kpis = [{
+                'KPI': 'System Health Score',
+                'Value': (DATA.validation.validRecords / DATA.validation.totalRecords * 100).toFixed(1) + '%'
+            }, {
+                'KPI': 'Average Daily Attendance',
+                'Value': (DATA.attendance.daily.reduce((a, b) => a + b) / DATA.attendance.daily.length).toFixed(1) + '%'
+            }, {
+                'KPI': 'Compliance Items Due',
+                'Value': DATA.compliance.filter(c => c.status !== 'Complete').length
+            }, {
+                'KPI': 'Total Students',
+                'Value': DATA.students.total
+            }, {
+                'KPI': 'Chronically Absent Students',
+                'Value': Object.values(DATA.attendance.chronicAbsence).reduce((a, b) => a + b, 0)
+            }];
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(kpis), 'KPIs');
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(DATA.compliance), 'Compliance');
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(DATA.validation.issues), 'Data Issues');
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(DATA.attendance.truancyQueue), 'Truancy Queue');
+            XLSX.writeFile(wb, `kipp_dashboard_export_${new Date().toISOString().split('T')[0]}.xlsx`);
         }
-        
+
         function generateAttendanceReport() {
-            alert('Monthly attendance report generated');
+            const month = document.getElementById('attendance-month')?.value || new Date().getMonth() + 1;
+            const reportType = document.getElementById('attendance-report-type')?.value || 'summary';
+            exportAttendanceReport(); // Reuse the export function
+            alert(`Monthly attendance report for month ${month} generated.\nReport type: ${reportType}`);
         }
-        
+
         function generateDESEAttendance() {
-            alert('DESE attendance submission file generated');
+            // Generate DESE-formatted attendance file
+            const lines = [];
+            lines.push('KIPP ST LOUIS ATTENDANCE SUBMISSION');
+            lines.push(`Generated: ${new Date().toISOString()}`);
+            lines.push(`School Year: 2025-2026`);
+            lines.push('');
+            lines.push('GRADE|ENROLLED|ADA_RATE|CHRONIC_ABSENT|CHRONIC_RATE');
+            Object.entries(DATA.students.byGrade).forEach(([grade, count]) => {
+                const chronic = DATA.attendance.chronicAbsence[grade] || 0;
+                const adaRate = (DATA.attendance.daily.reduce((a, b) => a + b) / DATA.attendance.daily.length).toFixed(1);
+                lines.push(`${grade}|${count}|${adaRate}|${chronic}|${(chronic/count*100).toFixed(1)}`);
+            });
+
+            const blob = new Blob([lines.join('\n')], {type: 'text/plain'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `DESE_attendance_submission_${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
         }
-        
+
         function addComplianceItem() {
-            alert('Compliance item added successfully');
-            closeModal('add-compliance-modal');
+            const taskName = document.getElementById('compliance-task-name')?.value;
+            const owner = document.getElementById('compliance-owner')?.value;
+            const category = document.getElementById('compliance-category')?.value;
+            const deadline = document.getElementById('compliance-deadline')?.value;
+
+            if (taskName && owner && deadline) {
+                const daysUntil = Math.floor((new Date(deadline) - new Date()) / (1000 * 60 * 60 * 24));
+                DATA.compliance.push({
+                    task: taskName,
+                    owner: owner,
+                    deadline: deadline,
+                    status: 'Not Started',
+                    category: category || 'General',
+                    daysUntil: daysUntil,
+                    priority: daysUntil < 7 ? 'high' : 'medium'
+                });
+                renderComplianceTable();
+                closeModal('add-compliance-modal');
+                alert(`Compliance item "${taskName}" added successfully.`);
+            } else {
+                alert('Please fill in all required fields.');
+            }
         }
         
         function createSection() {
@@ -3721,25 +4092,65 @@ WHERE home_phone IS NULL OR home_phone = ''`
         }
         
         function loadSavedQueries() {
-            alert('Saved queries would be displayed in a modal');
+            if (savedQueries.length === 0) {
+                alert('No saved queries yet.\n\nTo save a query:\n1. Write your SQL query\n2. Enter a name in the "Query Name" field\n3. Click "Save Query"');
+                return;
+            }
+            const queryList = savedQueries.map((q, i) => `${i + 1}. ${q.name} (${new Date(q.date).toLocaleDateString()})`).join('\n');
+            const selection = prompt(`Saved Queries:\n\n${queryList}\n\nEnter number to load:`);
+            if (selection && savedQueries[parseInt(selection) - 1]) {
+                document.getElementById('sql-query-input').value = savedQueries[parseInt(selection) - 1].query;
+            }
         }
-        
+
         function executeModalSQL() {
-            alert('Executing SQL query...');
+            const query = document.querySelector('#sql-modal textarea')?.value;
+            if (query) {
+                document.getElementById('sql-query-input').value = query;
+                executeSQL();
+            }
             closeModal('sql-modal');
+            switchPage('sql-query');
         }
-        
+
         function copySQLResults() {
-            alert('Results copied to clipboard');
+            if (lastSQLResults.length === 0) {
+                alert('No results to copy');
+                return;
+            }
+            const headers = Object.keys(lastSQLResults[0]);
+            const tsv = [headers.join('\t'), ...lastSQLResults.map(row => headers.map(h => row[h]).join('\t'))].join('\n');
+            navigator.clipboard.writeText(tsv).then(() => {
+                alert(`Copied ${lastSQLResults.length} rows to clipboard (tab-separated format)`);
+            }).catch(() => {
+                alert('Copy failed - please use Export to Excel instead');
+            });
         }
-        
+
         function validateMOSISOutput() {
-            alert('MOSIS output validated successfully');
+            const output = document.getElementById('mosis-output')?.value || '';
+            if (!output.trim()) {
+                alert('No MOSIS output to validate. Please generate a report first.');
+                return;
+            }
+            const lines = output.split('\n').filter(l => l.trim());
+            const errors = [];
+            lines.forEach((line, idx) => {
+                if (line.length !== 200 && idx > 0) { // Skip header
+                    errors.push(`Line ${idx + 1}: Expected 200 chars, got ${line.length}`);
+                }
+            });
+            if (errors.length === 0) {
+                alert(`✓ MOSIS output validated successfully!\n\n${lines.length} records checked.\nAll records conform to DESE fixed-width format specifications.`);
+            } else {
+                alert(`✗ Validation found ${errors.length} issues:\n\n${errors.slice(0, 5).join('\n')}${errors.length > 5 ? `\n... and ${errors.length - 5} more` : ''}`);
+            }
         }
 
         // ========== 3D VISUALIZATION DATA ==========
+        // Note: DATA_3D.students is generated from main DATA model for consistency
         const DATA_3D = {
-            students: generateStudentRiskData(200),
+            students: generateStudentRiskData(),  // Uses DATA model, not random
             interventions: {
                 nodes: [
                     // Risk Factors (red)
@@ -3805,37 +4216,96 @@ WHERE home_phone IS NULL OR home_phone = ''`
             ]
         };
 
-        function generateStudentRiskData(count) {
+        function generateStudentRiskData() {
+            // Generate student data based on main DATA model for consistency
             const students = [];
-            for (let i = 0; i < count; i++) {
-                const risk = Math.random();
-                let riskLevel, color;
-                if (risk < 0.15) {
-                    riskLevel = 'high';
-                    color = '#ef4444';
-                } else if (risk < 0.35) {
-                    riskLevel = 'medium';
-                    color = '#f59e0b';
-                } else {
-                    riskLevel = 'low';
-                    color = '#10b981';
-                }
+            const firstNames = ['James', 'Mary', 'Michael', 'Sarah', 'David', 'Emily', 'Marcus', 'Aaliyah', 'Jordan', 'Maya', 'Terrell', 'Brianna', 'Andre', 'Jasmine', 'Chris', 'Destiny', 'Isaiah', 'Alexis', 'Malik', 'Kayla', 'Devon', 'Zoe', 'Nia', 'Darius', 'Taylor', 'Cameron', 'Asia', 'Brandon', 'Diamond', 'Kevin'];
+            const lastNames = ['Anderson', 'Brown', 'Carter', 'Davis', 'Evans', 'Foster', 'Green', 'Harris', 'Irving', 'Jackson', 'King', 'Lewis', 'Mitchell', 'Nelson', 'Owens', 'Parker', 'Quinn', 'Robinson', 'Smith', 'Taylor', 'Underwood', 'Vance', 'Washington', 'Young', 'Williams', 'Johnson', 'Thompson', 'Garcia', 'Wilson', 'Moore'];
 
-                const baseAttendance = riskLevel === 'high' ? 70 : riskLevel === 'medium' ? 85 : 92;
-                const baseGPA = riskLevel === 'high' ? 1.5 : riskLevel === 'medium' ? 2.3 : 3.2;
-                const baseEngagement = riskLevel === 'high' ? 30 : riskLevel === 'medium' ? 55 : 75;
-
+            // First, add students from truancy queue (real data)
+            DATA.attendance.truancyQueue.forEach(s => {
+                const riskLevel = s.riskScore >= 0.7 ? 'high' : s.riskScore >= 0.4 ? 'medium' : 'low';
                 students.push({
-                    id: `S${String(i + 1000).padStart(6, '0')}`,
-                    name: `Student ${i + 1}`,
-                    grade: Math.floor(Math.random() * 7) + 6,
-                    attendance: Math.min(100, Math.max(50, baseAttendance + (Math.random() - 0.5) * 20)),
-                    gpa: Math.min(4.0, Math.max(0, baseGPA + (Math.random() - 0.5) * 1.5)),
-                    engagement: Math.min(100, Math.max(0, baseEngagement + (Math.random() - 0.5) * 30)),
+                    id: s.id,
+                    name: s.name,
+                    grade: s.grade,
+                    attendance: s.rate,
+                    gpa: riskLevel === 'high' ? 1.5 + Math.random() * 0.8 : riskLevel === 'medium' ? 2.2 + Math.random() * 0.6 : 2.8 + Math.random() * 0.8,
+                    engagement: (1 - s.riskScore) * 100,
                     riskLevel: riskLevel,
-                    color: color
+                    color: riskLevel === 'high' ? '#ef4444' : riskLevel === 'medium' ? '#f59e0b' : '#10b981'
                 });
-            }
+            });
+
+            // Add high-risk students from DATA
+            DATA.highRiskStudents.forEach(s => {
+                if (!students.find(st => st.id === s.id)) {
+                    students.push({
+                        id: s.id,
+                        name: s.name,
+                        grade: s.grade,
+                        attendance: 70 + Math.random() * 15,
+                        gpa: 1.0 + Math.random() * 1.0,
+                        engagement: 20 + Math.random() * 30,
+                        riskLevel: 'high',
+                        color: '#ef4444'
+                    });
+                }
+            });
+
+            // Generate remaining students based on byGrade distribution
+            let studentId = 10000;
+            const chronicAbsenceByGrade = DATA.attendance.chronicAbsence;
+            const totalChronic = Object.values(chronicAbsenceByGrade).reduce((a, b) => a + b, 0);
+
+            Object.entries(DATA.students.byGrade).forEach(([grade, count]) => {
+                const gradeNum = parseInt(grade);
+                const chronicInGrade = chronicAbsenceByGrade[grade] || 0;
+                const existingInGrade = students.filter(s => s.grade === gradeNum).length;
+                const remainingToGenerate = count - existingInGrade;
+
+                for (let i = 0; i < remainingToGenerate && students.length < DATA.students.total; i++) {
+                    // Determine risk level based on chronic absence distribution
+                    const isHighRisk = i < (chronicInGrade - existingInGrade) * 0.3;
+                    const isMediumRisk = i < (chronicInGrade - existingInGrade);
+
+                    let riskLevel, color, baseAttendance, baseGPA, baseEngagement;
+                    if (isHighRisk) {
+                        riskLevel = 'high';
+                        color = '#ef4444';
+                        baseAttendance = 65 + Math.random() * 15;
+                        baseGPA = 1.0 + Math.random() * 1.2;
+                        baseEngagement = 20 + Math.random() * 25;
+                    } else if (isMediumRisk) {
+                        riskLevel = 'medium';
+                        color = '#f59e0b';
+                        baseAttendance = 82 + Math.random() * 10;
+                        baseGPA = 2.0 + Math.random() * 1.0;
+                        baseEngagement = 45 + Math.random() * 25;
+                    } else {
+                        riskLevel = 'low';
+                        color = '#10b981';
+                        baseAttendance = 92 + Math.random() * 8;
+                        baseGPA = 2.8 + Math.random() * 1.2;
+                        baseEngagement = 70 + Math.random() * 30;
+                    }
+
+                    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+                    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+
+                    students.push({
+                        id: `S${String(studentId++).padStart(6, '0')}`,
+                        name: `${lastName}, ${firstName}`,
+                        grade: gradeNum,
+                        attendance: Math.min(100, baseAttendance),
+                        gpa: Math.min(4.0, Math.max(0, baseGPA)),
+                        engagement: Math.min(100, Math.max(0, baseEngagement)),
+                        riskLevel: riskLevel,
+                        color: color
+                    });
+                }
+            });
+
             return students;
         }
 
